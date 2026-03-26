@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace RH
+{% endblock %}
+
+{% block body %}
+	<h1>Bienvenue,
+		{{ app.user.fullName }}
+		(RH)</h1>
+	<p>Vous pouvez :</p>
+	<ul>
+		<li>Ouvrir / Clôturer une période de paie</li>
+		<li>Exporter la paie validée</li>
+		<li>Gérer les utilisateurs et permissions</li>
+	</ul>
+{% endblock %}

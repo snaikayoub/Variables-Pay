@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Prime de performance (liste) #}
+
+{% block title %}Liste - prime de performance{% endblock %}
+
+{% block body %}
+	<h1>Liste - prime de performance</h1>
+
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Collaborateur</th>
+				<th>Période</th>
+				<th>Groupe</th>
+				<th>Jours</th>
+				<th>Taux</th>
+				<th>Score Eq.</th>
+				<th>Score Col.</th>
+				<th>Note Hiér.</th>
+				<th>Montant (MAD)</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for p in primes %}
+				<tr>
+					<td>{{ p.id }}</td>
+					<td>{{ p.employee.matricule }}</td>
+					<td>{{ p.periodePaie }}</td>
+					<td>{{ p.groupePerf }}</td>
+					<td>{{ p.joursPerf }}</td>
+					<td>{{ p.tauxMonaitaire|number_format(2, ',', ' ') }}</td>
+					<td>{{ p.scoreEquipe }}%</td>
+					<td>{{ p.scoreCollectif }}%</td>
+					<td>{{ p.noteHierarchique }}%</td>
+					<td>{{ p.montantPerf|number_format(2, ',', ' ') }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

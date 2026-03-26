@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Aide{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+	{# Nomenclature: on distingue les types de prime (performance / fonction) #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">
+            <i class="fas fa-question-circle text-info me-2"></i>Aide
+        </h1>
+        <a href="{{ path('gestionnaire_dashboard') }}" class="btn btn-outline-secondary">
+            TABLEAU DE BORD
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5><i class="fas fa-book me-2"></i>Guide d'utilisation</h5>
+            <hr>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-calculator me-1 text-info"></i> Prime de performance</h6>
+                            <p class="card-text small">Accedez a la saisie de la prime de performance via le tableau de bord. Selectionnez le type de paie (mensuelle ou quinzaine) pour commencer.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-route me-1 text-success"></i> Déplacements</h6>
+                            <p class="card-text small">Créez de nouvelles missions et déplacements pour vos collaborateurs. La distance est calculée automatiquement.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-dark">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-id-badge me-1 text-dark"></i> Prime de fonction</h6>
+                            <p class="card-text small">Saisissez la prime de fonction (taux monetaire, nombre de jours, note hierarchique 0..1) puis soumettez pour validation.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-umbrella-beach me-1 text-warning"></i> Congés</h6>
+                            <p class="card-text small">Gérez les demandes de congés de vos collaborateurs. Approuvez ou rejetez les demandes en attente.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-primary">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-headset me-1 text-primary"></i> Support</h6>
+                            <p class="card-text small">Pour toute question ou problème, contactez l'administrateur du système ou le service RH.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Deplacements (creation) #}
+
+{% block title %}Nouvelle mission / déplacement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'gestionnaire/voyages/_voyage_assets.html.twig' %}
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="fw-bold mb-1">Nouvelle mission / déplacement</h1>
+        <div class="text-muted">Renseignez les informations de déplacement du collaborateur.</div>
+    </div>
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% include 'gestionnaire/voyages/_form.html.twig' with { form: form, typePaie: typePaie|default(null) } %}
+</div>
+{% endblock %}

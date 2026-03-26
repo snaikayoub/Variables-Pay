@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export PDF - Synthese RH (prime de performance)</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #222; padding: 2px 4px; }
+        th { background: #e2e2e2; }
+    </style>
+</head>
+<body>
+    <h2>Synthese RH - Prime de performance</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Période</th>
+            <th>Division</th>
+            <th>Service</th>
+            <th>Statut</th>
+            <th>Montant</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for pp in primes %}
+            <tr>
+                <td>{{ pp.employee.matricule }}</td>
+                <td>{{ pp.employee.getFullName() }}</td>
+                <td>{{ pp.periodePaie }}</td>
+                <td>{{ pp.employee.employeeSituations[0].service.division.nom ?? '' }}</td>
+                <td>{{ pp.employee.employeeSituations[0].service.nom ?? '' }}</td>
+                <td>{{ pp.status|capitalize }}</td>
+                <td>{{ pp.getMontantFormate() }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">Aucune donnée.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

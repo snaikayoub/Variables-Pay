@@ -1,0 +1,124 @@
+{% extends 'responsable/_layout.html.twig' %}
+
+{% block title %}Responsable division{% endblock %}
+
+{% block rd_body %}
+	<div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+		<div class="position-relative">
+			<div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+				<div>
+					<span class="rd-chip"><i class="fas fa-sitemap"></i> Responsable division</span>
+					<h1 class="rd-title h3 mb-1 mt-2">Tableau de bord</h1>
+					<div class="rd-subtle">Choisis un module, puis une periode, puis un service.</div>
+				</div>
+				<div class="d-flex gap-2">
+					<a href="{{ path('app_logout') }}" class="btn btn-outline-secondary rd-btn">Deconnexion</a>
+				</div>
+			</div>
+
+			<div class="mt-4 row g-3">
+				<div class="col-md-4">
+					<div class="rd-kpi p-3 p-md-4">
+						<div class="rd-subtle small">Performance</div>
+						<div class="d-flex justify-content-between align-items-end">
+							<div class="rd-kpi-num h4 mb-0">{{ (countReadyMensuelle|default(0) + countReadyQuinzaine|default(0)) }}</div>
+							<div class="rd-subtle small">en attente</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="rd-kpi p-3 p-md-4">
+						<div class="rd-subtle small">Fonction</div>
+						<div class="d-flex justify-content-between align-items-end">
+							<div class="rd-kpi-num h4 mb-0">{{ (countFonctionReadyMensuelle|default(0) + countFonctionReadyQuinzaine|default(0)) }}</div>
+							<div class="rd-subtle small">en attente</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="rd-kpi p-3 p-md-4">
+						<div class="rd-subtle small">Deplacements</div>
+						<div class="d-flex justify-content-between align-items-end">
+							<div class="rd-kpi-num h4 mb-0">{{ (countVoyageReadyMensuelle|default(0) + countVoyageReadyQuinzaine|default(0)) }}</div>
+							<div class="rd-subtle small">en attente</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-4">
+		<div class="col-lg-4">
+			<a class="text-decoration-none" href="{{ path('responsable_division_validation_overview', { module: 'performance' }) }}">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-70">
+				<div class="d-flex align-items-start justify-content-between">
+					<div>
+						<div class="rd-chip"><i class="fas fa-coins"></i> Performance</div>
+						<h2 class="h5 mt-3 mb-1">Validation performance</h2>
+						<div class="rd-subtle small">Valide les primes deja validees par le service.</div>
+					</div>
+					<div class="text-end">
+						<div class="rd-subtle small">A valider</div>
+						<div class="h4 mb-0 fw-bold">{{ (countReadyMensuelle|default(0) + countReadyQuinzaine|default(0)) }}</div>
+					</div>
+				</div>
+				<div class="mt-4 d-flex flex-wrap gap-2">
+					<span class="rd-chip">Mensuelle: {{ countReadyMensuelle|default(0) }} en attente</span>
+					<span class="rd-chip">Quinzaine: {{ countReadyQuinzaine|default(0) }} en attente</span>
+					<span class="rd-chip">Validees: {{ countValidMensuelle|default(0) + countValidQuinzaine|default(0) }}</span>
+				</div>
+				<div class="rd-subtle small mt-3">Clique pour voir tous les services + filtres.</div>
+				</div>
+			</a>
+		</div>
+
+		<div class="col-lg-4">
+			<a class="text-decoration-none" href="{{ path('responsable_division_validation_overview', { module: 'fonction' }) }}">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-110">
+				<div class="d-flex align-items-start justify-content-between">
+					<div>
+						<div class="rd-chip"><i class="fas fa-id-badge"></i> Fonction</div>
+						<h2 class="h5 mt-3 mb-1">Validation fonction</h2>
+						<div class="rd-subtle small">Controle le calcul et les jours, puis valide.</div>
+					</div>
+					<div class="text-end">
+						<div class="rd-subtle small">A valider</div>
+						<div class="h4 mb-0 fw-bold">{{ (countFonctionReadyMensuelle|default(0) + countFonctionReadyQuinzaine|default(0)) }}</div>
+					</div>
+				</div>
+				<div class="mt-4 d-flex flex-wrap gap-2">
+					<span class="rd-chip">Mensuelle: {{ countFonctionReadyMensuelle|default(0) }} en attente</span>
+					<span class="rd-chip">Quinzaine: {{ countFonctionReadyQuinzaine|default(0) }} en attente</span>
+					<span class="rd-chip">Validees: {{ countFonctionValidMensuelle|default(0) + countFonctionValidQuinzaine|default(0) }}</span>
+				</div>
+				<div class="rd-subtle small mt-3">Clique pour voir tous les services + filtres.</div>
+				</div>
+			</a>
+		</div>
+
+		<div class="col-lg-4">
+			<a class="text-decoration-none" href="{{ path('responsable_division_validation_overview', { module: 'voyages' }) }}">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-150">
+				<div class="d-flex align-items-start justify-content-between">
+					<div>
+						<div class="rd-chip"><i class="fas fa-route"></i> Deplacements</div>
+						<h2 class="h5 mt-3 mb-1">Validation deplacements</h2>
+						<div class="rd-subtle small">Valide ou retourne au service, puis cloture.</div>
+					</div>
+					<div class="text-end">
+						<div class="rd-subtle small">A valider</div>
+						<div class="h4 mb-0 fw-bold">{{ (countVoyageReadyMensuelle|default(0) + countVoyageReadyQuinzaine|default(0)) }}</div>
+					</div>
+				</div>
+				<div class="mt-4 d-flex flex-wrap gap-2">
+					<span class="rd-chip">Mensuelle: {{ countVoyageReadyMensuelle|default(0) }} en attente</span>
+					<span class="rd-chip">Quinzaine: {{ countVoyageReadyQuinzaine|default(0) }} en attente</span>
+					<span class="rd-chip">Valides: {{ countVoyageValidMensuelle|default(0) + countVoyageValidQuinzaine|default(0) }}</span>
+				</div>
+				<div class="rd-subtle small mt-3">Clique pour voir tous les services + filtres.</div>
+				</div>
+			</a>
+		</div>
+	</div>
+{% endblock %}

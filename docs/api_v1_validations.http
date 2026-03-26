@@ -1,0 +1,72 @@
+# For VS Code REST Client / JetBrains HTTP Client
+
+@baseUrl = http://127.0.0.1:8000
+
+### Login (JWT)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1@ocp.com",
+  "password": "CHANGE_ME"
+}
+
+### Refresh (JWT)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "PASTE_REFRESH_TOKEN"
+}
+
+### Me
+GET {{baseUrl}}/api/me
+Authorization: Bearer PASTE_ACCESS_TOKEN
+
+### Validations - Voyages (Responsable service)
+GET {{baseUrl}}/api/responsable/service/voyages?typePaie=mensuelle&status=submitted
+Authorization: Bearer PASTE_ACCESS_TOKEN
+
+### Batch validate voyages (service)
+POST {{baseUrl}}/api/responsable/service/voyages/batch/validate
+Authorization: Bearer PASTE_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "ids": [1, 2, 3]
+}
+
+### Batch reject voyages (service)
+POST {{baseUrl}}/api/responsable/service/voyages/batch/reject
+Authorization: Bearer PASTE_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "ids": [1, 2, 3]
+}
+
+### Batch retour voyages (service -> gestionnaire)
+POST {{baseUrl}}/api/responsable/service/voyages/batch/retour
+Authorization: Bearer PASTE_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "ids": [1, 2, 3]
+}
+
+### Validations - Prime performance (Responsable service)
+GET {{baseUrl}}/api/responsable/service/prime-performance?typePaie=mensuelle&status=submitted
+Authorization: Bearer PASTE_ACCESS_TOKEN
+
+### Batch validate prime performance (service)
+POST {{baseUrl}}/api/responsable/service/prime-performance/batch/validate
+Authorization: Bearer PASTE_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "ids": [10, 11]
+}
+
+### Validations - Prime fonction (Responsable service)
+GET {{baseUrl}}/api/responsable/service/prime-fonction?typePaie=mensuelle&status=submitted
+Authorization: Bearer PASTE_ACCESS_TOKEN

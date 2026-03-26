@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Historique - prime de performance (placeholder) #}
+
+{% block title %}Historique - prime de performance{% endblock %}
+
+{% block body %}
+	<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">
+            <i class="fas fa-history text-info me-2"></i>Historique — {{ type|capitalize }}
+        </h1>
+        <a href="{{ path('gestionnaire_dashboard') }}" class="btn btn-outline-secondary">TABLEAU DE BORD</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body text-center text-muted py-5">
+            <i class="fas fa-clock fs-1 mb-3"></i>
+			<p class="fs-5">L'historique des primes de performance pour le type « {{ type }} » sera affiche ici.</p>
+            <p>Cette fonctionnalité est en cours de développement.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

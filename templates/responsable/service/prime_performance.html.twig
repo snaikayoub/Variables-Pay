@@ -1,0 +1,216 @@
+{% extends 'responsable/_layout.html.twig' %}
+
+{# Module: Prime de performance (validation service) #}
+
+{% block title %}Validation des primes de performance{% endblock %}
+
+{% block rd_body %}
+	<div class="container">
+		<div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+			<div class="position-relative">
+				<div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+					<div>
+						<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+							<span class="rd-chip"><i class="fas fa-coins"></i> Performance</span>
+							<span class="rd-chip">Validation service</span>
+							<span class="rd-chip">{{ type|capitalize }}</span>
+						</div>
+						<h1 class="rd-title h3 mb-1">Primes de performance</h1>
+						<div class="rd-subtle">Valider, retourner, et suivre l'etat des primes.</div>
+					</div>
+					<div class="d-flex gap-2">
+						<a href="{{ path('responsable_service_dashboard') }}" class="btn btn-outline-secondary rd-btn">
+							<i class="fas fa-arrow-left me-1"></i>Dashboard
+						</a>
+					</div>
+				</div>
+
+		{% if periodeCourante %}
+				<div class="mt-4 rd-kpi p-3 p-md-4">
+					<div class="row g-3 align-items-center">
+						<div class="col-md-6">
+							<div class="rd-subtle small">Periode courante</div>
+							<div class="fw-semibold">
+								{{ '%02d'|format(periodeCourante.mois) }}/{{ periodeCourante.annee }}
+								{% if periodeCourante.quinzaine %}(Q{{ periodeCourante.quinzaine }}){% endif %}
+							</div>
+							<div class="rd-subtle small mt-1">Score equipe: {{ periodeCourante.scoreEquipe ?? 'N/A' }} | Score collectif: {{ periodeCourante.scoreCollectif ?? 'N/A' }}</div>
+						</div>
+						<div class="col-md-6">
+							<div class="d-flex flex-wrap gap-2 justify-content-md-end">
+								<span class="rd-chip"><span class="rd-kpi-num">{{ primes|length }}</span> A valider</span>
+								<span class="rd-chip"><span class="rd-kpi-num">{{ validated|length }}</span> Validees</span>
+								<span class="rd-chip"><span class="rd-kpi-num">{{ drafts|length }}</span> Retournees</span>
+							</div>
+						</div>
+					</div>
+				</div>
+		{% endif %}
+			</div>
+		</div>
+
+		{# TABLEAU 1 : Prime de performance - a valider #}
+		<div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-70">
+			<div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+				<h5 class="mb-0">
+					<i class="fas fa-hourglass-start me-2"></i>Primes de performance en attente de validation</h5>
+			</div>
+			<div class="p-3 p-md-4">
+				<div class="table-responsive" data-controller="check-all">
+						<table class="table rd-table table-bordered table-hover align-middle mb-0">
+							<thead>
+								<tr>
+									<th><input type="checkbox" data-check-all-target="master" data-action="change->check-all#toggleAll"></th>
+									<th>Employé</th>
+									<th>Matricule</th>
+									<th>Période</th>
+									<th>Montant</th>
+									<th>Note Hiérarchique</th>
+									<th>Jours Perf.</th>
+									<th class="text-center">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for pp in primes %}
+									<tr>
+										<td><input type="checkbox" name="selected[]" value="{{ pp.id }}" form="form-batch" data-check-all-target="item" data-action="change->check-all#itemChanged"></td>
+										<td>{{ pp.employee.prenom }}
+											{{ pp.employee.nom }}</td>
+										<td>{{ pp.employee.matricule }}</td>
+										<td>{{ '%02d'|format(pp.periodePaie.mois) }}/{{ pp.periodePaie.annee }}</td>
+										<td>
+											<strong>{{ pp.getMontantFormate() }}</strong>
+										</td>
+										<td>{{ pp.noteHierarchique }}</td>
+										<td>{{ pp.joursPerf }}</td>
+										<td class="text-center">
+											<div class="d-inline-flex gap-1">
+											<form method="post" action="{{ path('responsable_service_performance_valider_ligne', { type: type, id: pp.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Valider cette prime ?">
+												<input type="hidden" name="_token" value="{{ csrf_token('responsable_valider_ligne') }}">
+												<button type="submit" class="btn btn-sm btn-success">
+													<i class="fas fa-check me-1"></i>Valider
+												</button>
+											</form>
+											<form method="post" action="{{ path('responsable_service_performance_retour_ligne', { type: type, id: pp.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Retourner cette prime au gestionnaire ?">
+												<input type="hidden" name="_token" value="{{ csrf_token('responsable_retour_ligne') }}">
+												<button type="submit" class="btn btn-sm btn-outline-danger">
+													<i class="fas fa-undo me-1"></i>Rejeter
+												</button>
+											</form>
+											</div>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="8" class="text-center text-muted">Aucune prime en attente.</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+				</div>
+
+				<form method="post" action="{{ path('responsable_service_performance_valider_batch', { type: type }) }}" id="form-batch" class="text-end mt-3">
+					<button type="submit" class="btn btn-success" name="_token" value="{{ csrf_token('responsable_valider_batch') }}">
+						<i class="fas fa-check-double me-1"></i>Valider la sélection
+					</button>
+					<button type="submit" formaction="{{ path('responsable_service_performance_retour_batch', { type: type }) }}" class="btn btn-outline-danger ms-2" name="_token" value="{{ csrf_token('responsable_retour_batch') }}">
+						<i class="fas fa-undo me-1"></i>Retourner la sélection
+					</button>
+					<a href="{{ path('responsable_service_dashboard') }}" class="btn btn-outline-secondary">
+						<i class="fas fa-arrow-left me-1"></i>Retour au tableau de bord
+					</a>
+				</form>
+			</div>
+		</div>
+
+
+
+		{# TABLEAU 2 : Prime de performance - validees service #}
+		<div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-110">
+			<div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+				<h5 class="mb-0">
+					<i class="fas fa-check-double me-2"></i>Primes de performance validees (service)</h5>
+			</div>
+			<div class="p-3 p-md-4">
+				<div class="table-responsive">
+					<table class="table rd-table table-bordered table-hover align-middle mb-0">
+						<thead>
+							<tr>
+								<th>Employé</th>
+								<th>Matricule</th>
+								<th>Période</th>
+								<th>Montant</th>
+								<th>Note Hiérarchique</th>
+								<th>Jours Perf.</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for pp in validated %}
+								<tr>
+									<td>{{ pp.employee.prenom }}
+										{{ pp.employee.nom }}</td>
+									<td>{{ pp.employee.matricule }}</td>
+									<td>{{ '%02d'|format(pp.periodePaie.mois) }}/{{ pp.periodePaie.annee }}</td>
+									<td>
+										<strong>{{ pp.getMontantFormate() }}</strong>
+									</td>
+									<td>{{ pp.noteHierarchique }}</td>
+									<td>{{ pp.joursPerf }}</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6" class="text-center text-muted">Aucune prime validée.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		{# TABLEAU 3 : Prime de performance - retournees au gestionnaire #}
+		<div class="rd-card p-0 rd-anim rd-anim-delay-150">
+			<div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+				<h5 class="mb-0">
+					<i class="fas fa-undo me-2"></i>Primes de performance retournees</h5>
+			</div>
+			<div class="p-3 p-md-4">
+				<div class="table-responsive">
+					<table class="table rd-table table-bordered table-hover align-middle mb-0">
+						<thead>
+							<tr>
+								<th>Employé</th>
+								<th>Matricule</th>
+								<th>Période</th>
+								<th>Montant</th>
+								<th>Note Hiérarchique</th>
+								<th>Jours Perf.</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for pp in drafts %}
+								<tr>
+									<td>{{ pp.employee.prenom }}
+										{{ pp.employee.nom }}</td>
+									<td>{{ pp.employee.matricule }}</td>
+									<td>{{ '%02d'|format(pp.periodePaie.mois) }}/{{ pp.periodePaie.annee }}</td>
+									<td>
+										<strong>{{ pp.getMontantFormate() }}</strong>
+									</td>
+									<td>{{ pp.noteHierarchique }}</td>
+									<td>{{ pp.joursPerf }}</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6" class="text-center text-muted">Aucune prime retournée.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endblock %}
+

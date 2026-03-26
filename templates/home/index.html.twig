@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Variables-Pay - Accueil{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Bienvenue sur <span class="text-primary">Variables-Pay</span></h1>
+        <p class="lead">Votre plateforme RH intelligente pour visualiser, analyser et piloter vos ressources humaines</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Indicateurs RH</h5>
+                    <p class="card-text">Suivez les KPIs : heures supplémentaires, absences, masse salariale, turnover, etc.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-primary">Voir les KPI</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-success shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Collaborateurs</h5>
+                    <p class="card-text">Visualisez la liste du personnel, les fiches détaillées, parcours et situations professionnelles.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-success">Gestion RH</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Historique et évolutions</h5>
+                    <p class="card-text">Suivez les promotions, mutations, changements familiaux et autres évolutions RH.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-info">Voir l'historique</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-warning shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Absences et congés</h5>
+                    <p class="card-text">Analyse des absences, types de congés, durée moyenne, alertes de dépassement, etc.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-warning">Statistiques absences</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-secondary shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Masse salariale</h5>
+                    <p class="card-text">Analyse de la masse salariale, taux horaire, charges sociales, évolutions dans le temps.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-secondary">Voir les données</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-dark shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🔐 Sécurité & Audits</h5>
+                    <p class="card-text">Suivi des accès, journalisation des actions, rôles et gestion des utilisateurs.</p>
+                    <a href="{{ path('home') }}" class="btn btn-outline-dark">Espace Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <small class="text-muted">Variables-Pay © {{ "now"|date("Y") }} – Tous droits réservés</small>
+    </div>
+</div>
+{% endblock %}

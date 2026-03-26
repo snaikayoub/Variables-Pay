@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Périodes de Paie
+{% endblock %}
+
+{% block body %}
+	<h1>Liste des Périodes de Paie</h1>
+
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Type</th>
+				<th>Mois</th>
+				<th>Année</th>
+				<th>Quinzaine</th>
+				<th>Statut</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for p in periodes %}
+				<tr>
+					<td>{{ p.id }}</td>
+					<td>{{ p.typePaie }}</td>
+					<td>{{ p.mois }}</td>
+					<td>{{ p.annee }}</td>
+					<td>{{ p.quinzaine ?: '–' }}</td>
+					<td>{{ p.statut }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

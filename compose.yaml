@@ -1,0 +1,57 @@
+services:
+    database:
+        image: mysql:8.0
+        container_name: mymrh_db
+        env_file:
+            - ./.env.docker
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:-mymrh}
+            MYSQL_USER: ${MYSQL_USER:-mymrh}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mymrh}
+            MYSQL_ROOT_HOST: '%'
+        ports:
+            - '3306:3306'
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - mymrh_network
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+
+    mailcatcher:
+        image: schickling/mailcatcher:latest
+        container_name: mymrh_mail
+        ports:
+            - "1080:1080"
+            - "1025:1025"
+        networks:
+            - mymrh_network
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: mymrh_pma
+        depends_on:
+            database:
+                condition: service_healthy
+        ports:
+            - "8080:80"
+        env_file:
+            - ./.env.docker
+        environment:
+            PMA_HOST: database
+            PMA_USER: ${MYSQL_USER:-mymrh}
+            PMA_PASSWORD: ${MYSQL_PASSWORD:-mymrh}
+        networks:
+            - mymrh_network
+
+volumes:
+    mysql_data:
+        name: mymrh_mysql_data
+
+networks:
+    mymrh_network:
+        name: mymrh_network

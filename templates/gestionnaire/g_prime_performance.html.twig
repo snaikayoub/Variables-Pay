@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Gestionnaire - saisie prime de performance #}
+
+{% block title %}
+	Saisie - prime de performance ({{ type == 'mensuelle' ? 'Paie mensuelle' : 'Paie quinzaine' }})
+{% endblock %}
+
+{% block body %}
+	<div class="container py-5">
+
+		{% for lbl, msgs in app.flashes %}
+			{% for m in msgs %}
+				<div class="alert alert-{{ lbl == 'error' ? 'danger' : 'success' }} alert-dismissible fade show">
+					<i class="fas fa-{{ lbl == 'error' ? 'exclamation-triangle' : 'check-circle' }} me-2"></i>
+					{{ m }}
+					<button class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		<div class="row mb-1">
+			<div class="col-md-8">
+				<h2 class="mb-2">
+					<i class="fas fa-edit text-primary me-2"></i>Saisie des primes de performance
+				</h2>
+				<p class="text-muted">
+					Type de paie :
+					<strong>{{ type == 'mensuelle' ? 'Mensuelle' : 'Quinzaine' }}</strong> |
+					Période :
+					<strong>{{ '%02d'|format(periode.mois) }}/{{ periode.annee }}
+						{% if periode.quinzaine %}
+							(Q{{ periode.quinzaine }})
+						{% endif %}
+					</strong>
+				</p>
+			</div>
+			<div class="col-md-4 text-end">
+				<a href="{{ path('gestionnaire_dashboard') }}" class="btn btn-outline-secondary">
+					TABLEAU DE BORD
+				</a>
+			</div>
+		</div>
+
+		{# Score affiché #}
+		<div class="score-display mb-4">
+			<div class="row">
+				<div class="col-md-6 score-item">
+					<div class="score-value">{{ scoreEquipe }}</div>
+					<div class="score-label">Score Équipe</div>
+				</div>
+				<div class="col-md-6 score-item">
+					<div class="score-value">{{ scoreCollectif }}</div>
+					<div class="score-label">Score Collectif</div>
+				</div>
+			</div>
+		</div>
+
+		{# Tableau des lignes à saisir #}
+		<div class="card mb-4">
+			<div class="card-header bg-primary text-white">
+				<h5 class="mb-0">
+					<i class="fas fa-edit me-2"></i>En cours de saisie
+					<span class="badge bg-light text-dark ms-2">{{ pending|length }} employé(s)</span>
+				</h5>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<thead class="table-light">
+							<tr>
+								<th>Matricule</th>
+								<th>Employé</th>
+								<th>Taux Monétaire</th>
+								<th>Jours Perf.</th>
+								<th>Note Hiérarchique</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for es in pending %}
+								<form method="post" action="{{ path('gestionnaire_submit_line', { type: type, esId: es.id }) }}">
+									<input type="hidden" name="periode" value="{{ periode.id }}">
+									<input type="hidden" name="_token" value="{{ csrf_token('gestionnaire_submit_line_' ~ es.id) }}">
+									<tr>
+										<td><span class="badge bg-secondary">{{ es.employee.matricule }}</span></td>
+										<td><strong>{{ es.employee.prenom }} {{ es.employee.nom }}</strong></td>
+										<td><span class="badge bg-info">{{ es.getTauxPP() }} Dhs</span></td>
+										<td><input name="vals[joursPerf]" type="number" step="0.5" class="form-control" required></td>
+										<td>
+											<select name="vals[noteHierarchique]" class="form-select" required>
+												<option value="">-- Choisir --</option>
+												<option value="150">150 – Exceptionnel</option>
+												<option value="132.5">132,5 – Très bon</option>
+												<option value="115">115 – Bon</option>
+												<option value="97.5">97,5 – Satisfaisant</option>
+												<option value="80">80 – Acceptable</option>
+												<option value="62.5">62,5 – Insuffisant</option>
+												<option value="45">45 – Médiocre</option>
+												<option value="27.5">27,5 – Très insuffisant</option>
+												<option value="0">0 – Inacceptable</option>
+											</select>
+										</td>
+										<td>
+											<button type="submit" class="btn btn-submit btn-sm btn-success">
+												<i class="fas fa-paper-plane me-1"></i>Soumettre
+											</button>
+										</td>
+									</tr>
+								</form>
+							{% else %}
+								<tr>
+									<td colspan="6" class="text-center py-4">Aucune ligne à saisir.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		{# Tableau des lignes déjà soumises #}
+		<div class="card">
+			<div class="card-header bg-success text-white">
+				<h5 class="mb-0">
+					<i class="fas fa-check me-2"></i>Déjà soumises
+					<span class="badge bg-light text-dark ms-2">{{ submittedMap|length }} employé(s)</span>
+				</h5>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<thead class="table-light">
+							<tr>
+								<th>Matricule</th>
+								<th>Employé</th>
+								<th>Montant</th>
+								<th>Note Hiérarchique</th>
+								<th>Jours Perf.</th>
+								<th>Statut</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for empId, pp in submittedMap %}
+								<tr>
+									<td><span class="badge bg-secondary">{{ pp.employee.matricule }}</span></td>
+									<td><strong>{{ pp.employee.prenom }} {{ pp.employee.nom }}</strong></td>
+									<td><span class="fw-bold text-success">{{ pp.getMontantFormate() }}</span></td>
+									<td>{{ pp.noteHierarchique ?? '-' }}</td>
+									<td>{{ pp.joursPerf ?? '-' }}</td>
+									<td>
+										{% set statusClass = pp.status == 'submitted' ? 'warning' : 'success' %}
+										<span class="badge bg-{{ statusClass }}">
+											{% if pp.status == 'submitted' %}
+												<i class="fas fa-clock me-1"></i>En attente validation service
+											{% elseif pp.status == 'service_validated' %}
+												<i class="fas fa-check me-1"></i>Validé service
+											{% elseif pp.status == 'division_validated' %}
+												<i class="fas fa-check-double me-1"></i>Validé division
+											{% else %}
+												{{ pp.status }}
+											{% endif %}
+										</span>
+									</td>
+									<td>
+									<form method="post" action="{{ path('gestionnaire_revert_line', { type, ppId: pp.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Remettre cette ligne en modification ?">
+										<input type="hidden" name="periode" value="{{ periode.id }}">
+										<input type="hidden" name="_token" value="{{ csrf_token('gestionnaire_revert_line_' ~ pp.id) }}">
+										<button type="submit" class="btn btn-warning btn-sm"
+											{% if pp.status != 'submitted' %} disabled {% endif %}>
+											<i class="fas fa-edit me-1"></i>Modifier
+										</button>
+									</form>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="7" class="text-center py-4">Aucune ligne soumise.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endblock %}

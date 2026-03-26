@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container py-4 oc-maxw-540 mx-auto">
+
+    <div class="mb-4">
+        <h2 class="h5">
+            <span class="me-2"><i class="fas fa-calendar-edit"></i></span>
+            Modifier la période
+        </h2>
+        <div class="bg-light rounded p-3 mb-3">
+            <strong>{{ periode }}</strong>
+            <span class="badge bg-secondary ms-2">{{ periode.statut }}</span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            {{ form_start(form, {
+                'attr': {
+                    'class': 'needs-validation',
+                    'novalidate': 'novalidate',
+                    'id': 'periode-form'
+                }
+            }) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.scoreEquipe, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.scoreEquipe, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Score équipe (0-100, décimales autorisées)',
+                            'required': 'required',
+                            'type': 'number',
+                            'step': '0.01',
+                            'min': '0',
+                            'max': '100',
+                            'inputmode': 'decimal'
+                        }
+                    }) }}
+                    <div class="invalid-feedback">
+                        Veuillez entrer un score d'équipe valide entre 0 et 100 (décimales autorisées).
+                    </div>
+                    {{ form_errors(form.scoreEquipe) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.scoreCollectif, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.scoreCollectif, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Score collectif (0-100, décimales autorisées)',
+                            'required': 'required',
+                            'type': 'number',
+                            'step': '0.01',
+                            'min': '0',
+                            'max': '100',
+                            'inputmode': 'decimal'
+                        }
+                    }) }}
+                    <div class="invalid-feedback">
+                        Veuillez entrer un score collectif valide entre 0 et 100 (décimales autorisées).
+                    </div>
+                    {{ form_errors(form.scoreCollectif) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.statut, {
+                        'attr': {
+                            'class': 'form-select',
+                            'required': 'required'
+                        }
+                    }) }}
+                    <div class="invalid-feedback">
+                        Veuillez choisir un statut.
+                    </div>
+                    {{ form_errors(form.statut) }}
+                </div>
+
+                <button id="submit-btn" type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <a href="{{ path('rh_periodes_index', {type: periode.typePaie}) }}" class="btn btn-link mt-3">
+        <i class="fas fa-arrow-left"></i> Retour à la liste des périodes
+    </a>
+</div>
+
+{# Contrôle front Bootstrap 5 et désactivation du bouton #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('periode-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Optionnel : validation en temps réel et gestion focus/out
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(function(input) {
+            input.addEventListener('input', function() {
+                if (form.classList.contains('was-validated')) {
+                    form.classList.remove('was-validated');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

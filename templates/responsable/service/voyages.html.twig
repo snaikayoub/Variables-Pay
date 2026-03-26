@@ -1,0 +1,219 @@
+{% extends 'responsable/_layout.html.twig' %}
+
+{% block title %}Validation des deplacements{% endblock %}
+
+{% block rd_body %}
+<div class="container">
+    <div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="rd-chip"><i class="fas fa-route"></i> Deplacements</span>
+                        <span class="rd-chip">Validation service</span>
+                        <span class="rd-chip">{{ type|capitalize }}</span>
+                    </div>
+                    <h1 class="rd-title h3 mb-1">Missions / deplacements</h1>
+                    <div class="rd-subtle">Valider, retourner ou rejeter les demandes.</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('responsable_service_dashboard') }}" class="btn btn-outline-secondary rd-btn">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+
+    {% if periodeCourante %}
+            <div class="mt-4 rd-kpi p-3 p-md-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <div class="rd-subtle small">Periode courante</div>
+                        <div class="fw-semibold">
+                            {{ '%02d'|format(periodeCourante.mois) }}/{{ periodeCourante.annee }}
+                            {% if periodeCourante.quinzaine %}(Q{{ periodeCourante.quinzaine }}){% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                            <span class="rd-chip"><span class="rd-kpi-num">{{ submitted|length }}</span> A valider</span>
+                            <span class="rd-chip"><span class="rd-kpi-num">{{ validated|length }}</span> Valides</span>
+                            <span class="rd-chip"><span class="rd-kpi-num">{{ rejected|length }}</span> Rejetes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    {% endif %}
+        </div>
+    </div>
+
+    <div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-70">
+        <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+            <div class="fw-semibold"><i class="fas fa-hourglass-start me-2"></i>A valider</div>
+            <span class="rd-chip">{{ submitted|length }}</span>
+        </div>
+        <div class="p-0">
+            <div class="table-responsive">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Collaborateur</th>
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for v in submitted %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ v.employee ? v.employee.fullName : '-' }}</div>
+                                <div class="text-muted small">{{ v.modeTransport ? v.modeTransport|capitalize : '' }}</div>
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                {% if v.villeDepartAller and v.villeArriveeAller %}
+                                    {{ v.villeDepartAller }} → {{ v.villeArriveeAller }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="small"><span class="text-muted">Depart:</span> {{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                <div class="small"><span class="text-muted">Retour:</span> {{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                {% if v.distanceKm and v.distanceKm > 0 %}
+                                    <span class="badge text-bg-info">{{ v.distanceKm|round }} km</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <form method="post" action="{{ path('responsable_service_voyages_valider', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Valider ce deplacement ?">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('responsable_voyage_valider_' ~ v.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-success">Valider</button>
+                                    </form>
+                                    <form method="post" action="{{ path('responsable_service_voyages_rejeter', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Rejeter ce deplacement ?">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('responsable_voyage_rejeter_' ~ v.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Rejeter</button>
+                                    </form>
+                                    <form method="post" action="{{ path('responsable_service_voyages_retour', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Retourner au gestionnaire (brouillon) ?">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('responsable_voyage_retour_' ~ v.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Retour</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">Aucun deplacement a valider.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-110">
+        <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+            <div class="fw-semibold"><i class="fas fa-check-double me-2"></i>Deja valides (service)</div>
+            <span class="rd-chip">{{ validated|length }}</span>
+        </div>
+        <div class="p-0">
+            <div class="table-responsive">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Collaborateur</th>
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for v in validated %}
+                        <tr>
+                            <td>{{ v.employee ? v.employee.fullName : '-' }}</td>
+                            <td class="d-none d-md-table-cell">
+                                {% if v.villeDepartAller and v.villeArriveeAller %}
+                                    {{ v.villeDepartAller }} → {{ v.villeArriveeAller }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="small"><span class="text-muted">Depart:</span> {{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                <div class="small"><span class="text-muted">Retour:</span> {{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                {% if v.distanceKm and v.distanceKm > 0 %}
+                                    <span class="badge text-bg-info">{{ v.distanceKm|round }} km</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Aucun deplacement valide.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-card p-0 rd-anim rd-anim-delay-150">
+        <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+            <div class="fw-semibold"><i class="fas fa-triangle-exclamation me-2"></i>Rejetes</div>
+            <span class="rd-chip">{{ rejected|length }}</span>
+        </div>
+        <div class="p-0">
+            <div class="table-responsive">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Collaborateur</th>
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for v in rejected %}
+                        <tr>
+                            <td>{{ v.employee ? v.employee.fullName : '-' }}</td>
+                            <td class="d-none d-md-table-cell">
+                                {% if v.villeDepartAller and v.villeArriveeAller %}
+                                    {{ v.villeDepartAller }} → {{ v.villeArriveeAller }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="small"><span class="text-muted">Depart:</span> {{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                <div class="small"><span class="text-muted">Retour:</span> {{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                {% if v.distanceKm and v.distanceKm > 0 %}
+                                    <span class="badge text-bg-info">{{ v.distanceKm|round }} km</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Aucun deplacement rejete.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

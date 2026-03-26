@@ -1,0 +1,360 @@
+{% extends 'responsable/_layout.html.twig' %}
+
+{% set moduleLabel = module == 'performance' ? 'Performance' : (module == 'fonction' ? 'Fonction' : 'Deplacements') %}
+{% set moduleIcon = module == 'performance' ? 'fa-coins' : (module == 'fonction' ? 'fa-id-badge' : 'fa-route') %}
+
+{% block title %}Validation division - {{ moduleLabel }}{% endblock %}
+
+{% block rd_body %}
+    <div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="rd-chip"><i class="fas {{ moduleIcon }}"></i> Validation division</span>
+                        <span class="rd-chip">{{ moduleLabel }}</span>
+                        <span class="rd-chip">{{ type|capitalize }}</span>
+                    </div>
+                    <h1 class="rd-title h3 mb-1">{{ service ? service.nom : 'Tous les services' }}</h1>
+                    <div class="rd-subtle">Controle, validation et retour au service.</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-secondary rd-btn" href="{{ path('responsable_division_dashboard') }}">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+
+            {% if services is defined %}
+                <form class="mt-4 rd-kpi p-3 p-md-4" method="get" action="{{ path('responsable_division_validation_overview', { module: module }) }}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label rd-subtle small mb-1">Type de paie</label>
+                            <select class="form-select" name="type">
+                                <option value="mensuelle" {{ type == 'mensuelle' ? 'selected' : '' }}>Mensuelle</option>
+                                <option value="quinzaine" {{ type == 'quinzaine' ? 'selected' : '' }}>Quinzaine</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label rd-subtle small mb-1">Service</label>
+                            <select class="form-select" name="serviceId">
+                                <option value="0" {{ (serviceId|default(0) == 0) ? 'selected' : '' }}>Tous les services</option>
+                                {% for s in services %}
+                                    <option value="{{ s.id }}" {{ (serviceId|default(0) == s.id) ? 'selected' : '' }}>{{ s.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 text-md-end">
+                            <button class="btn btn-dark rd-btn w-100" type="submit">
+                                <i class="fas fa-filter me-1"></i>Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            {% elseif periodeCourante %}
+                <div class="mt-4 rd-kpi p-3 p-md-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <div class="rd-subtle small">Periode courante</div>
+                            <div class="fw-semibold">
+                                {{ '%02d'|format(periodeCourante.mois) }}/{{ periodeCourante.annee }}
+                                {% if periodeCourante.quinzaine %}(Q{{ periodeCourante.quinzaine }}){% endif %}
+                            </div>
+                            {% if module == 'performance' %}
+                                <div class="rd-subtle small mt-1">Score equipe: {{ periodeCourante.scoreEquipe ?? 'N/A' }} | Score collectif: {{ periodeCourante.scoreCollectif ?? 'N/A' }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                                <span class="rd-chip"><span class="rd-kpi-num">{{ submitted|length }}</span> Soumis</span>
+                                <span class="rd-chip"><span class="rd-kpi-num">{{ ready|length }}</span> A valider</span>
+                                <span class="rd-chip"><span class="rd-kpi-num">{{ validated|length }}</span> Valides</span>
+                                {% if module == 'voyages' %}
+                                    <span class="rd-chip"><span class="rd-kpi-num">{{ rejected|length }}</span> Rejetes</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 1) A valider (division) #}
+    {% if module == 'performance' %}
+        {% set batchAction = path('responsable_division_performance_valider_batch', { type: type }) %}
+        {% set batchBackAction = path('responsable_division_performance_retour_batch', { type: type }) %}
+        {% set lineOkRoute = 'responsable_division_performance_valider_ligne' %}
+        {% set lineBackRoute = 'responsable_division_performance_retour_ligne' %}
+        {% set batchCsrf = 'responsable_division_valider_batch' %}
+        {% set backBatchCsrf = 'responsable_division_retour_batch' %}
+        {% set lineOkCsrf = 'responsable_division_valider_ligne' %}
+        {% set lineBackCsrf = 'responsable_division_retour_ligne' %}
+    {% elseif module == 'fonction' %}
+        {% set batchAction = path('responsable_division_fonction_valider_batch', { type: type }) %}
+        {% set batchBackAction = path('responsable_division_fonction_retour_batch', { type: type }) %}
+        {% set lineOkRoute = 'responsable_division_fonction_valider_ligne' %}
+        {% set lineBackRoute = 'responsable_division_fonction_retour_ligne' %}
+        {% set batchCsrf = 'responsable_division_fonction_valider_batch' %}
+        {% set backBatchCsrf = 'responsable_division_fonction_retour_batch' %}
+        {% set lineOkCsrf = 'responsable_division_fonction_valider_ligne' %}
+        {% set lineBackCsrf = 'responsable_division_fonction_retour_ligne' %}
+    {% endif %}
+
+    <div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-110">
+        <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+            <div class="fw-semibold"><i class="fas fa-hourglass-start me-2"></i>A valider (division)</div>
+            <span class="rd-chip">{{ ready|length }}</span>
+        </div>
+
+        {% if module in ['performance', 'fonction'] %}
+            <div class="table-responsive" data-controller="check-all">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="rd-w-42"><input type="checkbox" data-check-all-target="master" data-action="change->check-all#toggleAll"></th>
+                            <th>Employe</th>
+                            <th>Matricule</th>
+                            {% if not service %}<th class="d-none d-md-table-cell">Service</th>{% endif %}
+                            {% if module == 'fonction' %}
+                                <th>Taux</th>
+                                <th>Jours</th>
+                                <th>Note</th>
+                            {% endif %}
+                            <th class="text-end">Montant</th>
+                            <th class="text-end rd-w-220">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ready %}
+                            <tr>
+                                <td><input type="checkbox" name="selected[]" value="{{ row.id }}" form="form-batch" data-check-all-target="item" data-action="change->check-all#itemChanged"></td>
+                                <td>{{ row.employee.prenom }} {{ row.employee.nom }}</td>
+                                <td>{{ row.employee.matricule }}</td>
+                                {% if not service %}<td class="d-none d-md-table-cell">{{ row.employee.currentServiceName }}</td>{% endif %}
+                                {% if module == 'fonction' %}
+                                    <td>{{ row.tauxMonetaireFonction }}</td>
+                                    <td>{{ row.nombreJours }}</td>
+                                    <td>{{ row.noteHierarchique }}</td>
+                                {% endif %}
+                                <td class="text-end fw-semibold">{{ row.getMontantFormate() }}</td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                        <form method="post" action="{{ path(lineOkRoute, { type: type, id: row.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Valider cet element ?">
+                                            <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token(lineOkCsrf) }}">
+                                            <button type="submit" class="btn btn-sm btn-success rd-btn">Valider</button>
+                                        </form>
+                                        <form method="post" action="{{ path(lineBackRoute, { type: type, id: row.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Retourner au service ?">
+                                            <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token(lineBackCsrf) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rd-btn">Retour</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ module == 'fonction' ? (service ? 9 : 10) : (service ? 6 : 7) }}" class="text-center text-muted py-4">Aucun element en attente.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <form method="post" action="{{ batchAction }}" id="form-batch" class="p-3 p-md-4 text-end">
+                <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                    <button type="submit" class="btn btn-success rd-btn" name="_token" value="{{ csrf_token(batchCsrf) }}">
+                        <i class="fas fa-check-double me-1"></i>Valider la selection
+                    </button>
+                    <button type="submit" class="btn btn-outline-danger rd-btn ms-2" formaction="{{ batchBackAction }}" formmethod="post" name="_token" value="{{ csrf_token(backBatchCsrf) }}">
+                        <i class="fas fa-undo me-1"></i>Retourner la selection
+                    </button>
+            </form>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Collaborateur</th>
+                            {% if not service %}<th class="d-none d-md-table-cell">Service</th>{% endif %}
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                            <th class="text-end rd-w-260">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in ready %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ v.employee ? v.employee.fullName : '-' }}</div>
+                                    <div class="text-muted small">{{ v.modeTransport ? v.modeTransport|capitalize : '' }}</div>
+                                </td>
+                                {% if not service %}<td class="d-none d-md-table-cell">{{ v.employee ? v.employee.currentServiceName : '' }}</td>{% endif %}
+                                <td class="d-none d-md-table-cell">
+                                    {% if v.villeDepartAller and v.villeArriveeAller %}
+                                        {{ v.villeDepartAller }} → {{ v.villeArriveeAller }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small"><span class="text-muted">Depart:</span> {{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                    <div class="small"><span class="text-muted">Retour:</span> {{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if v.distanceKm and v.distanceKm > 0 %}
+                                        <span class="badge text-bg-info">{{ v.distanceKm|round }} km</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                            <form method="post" action="{{ path('responsable_division_voyages_valider', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Valider ce deplacement ?">
+                                                <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('responsable_division_voyage_valider_' ~ v.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-success rd-btn">Valider</button>
+                                            </form>
+                                            <form method="post" action="{{ path('responsable_division_voyages_retour', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Retourner au service ?">
+                                                <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('responsable_division_voyage_retour_' ~ v.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary rd-btn">Retour</button>
+                                            </form>
+                                            <form method="post" action="{{ path('responsable_division_voyages_rejeter', { type: type, id: v.id }) }}" class="d-inline" data-controller="confirm" data-action="submit->confirm#submit" data-confirm-message-value="Rejeter ce deplacement ?">
+                                                <input type="hidden" name="serviceId" value="{{ serviceId|default(0) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('responsable_division_voyage_rejeter_' ~ v.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rd-btn">Rejeter</button>
+                                            </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ service ? 5 : 6 }}" class="text-center text-muted py-4">Aucun deplacement en attente.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    {# 3) Valides #}
+    <div class="rd-card p-0 mb-4 rd-anim rd-anim-delay-150">
+        <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+            <div class="fw-semibold"><i class="fas fa-check-double me-2"></i>Valides (division)</div>
+            <span class="rd-chip">{{ validated|length }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table rd-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Employe</th>
+                        <th>Matricule</th>
+                        {% if module == 'voyages' %}
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                        {% else %}
+                            {% if not service %}<th class="d-none d-md-table-cell">Service</th>{% endif %}
+                            <th class="text-end">Montant</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in validated %}
+                        {% if module == 'voyages' %}
+                            <tr>
+                                <td>{{ row.employee ? row.employee.fullName : '-' }}</td>
+                                <td>{{ row.employee ? row.employee.matricule : '-' }}</td>
+                                <td class="d-none d-md-table-cell">
+                                    {% if row.villeDepartAller and row.villeArriveeAller %}
+                                        {{ row.villeDepartAller }} → {{ row.villeArriveeAller }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small"><span class="text-muted">Depart:</span> {{ row.dateHeureDepart ? row.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                    <div class="small"><span class="text-muted">Retour:</span> {{ row.dateHeureRetour ? row.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if row.distanceKm and row.distanceKm > 0 %}
+                                        <span class="badge text-bg-info">{{ row.distanceKm|round }} km</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td>{{ row.employee.prenom }} {{ row.employee.nom }}</td>
+                                <td>{{ row.employee.matricule }}</td>
+                                {% if not service %}<td class="d-none d-md-table-cell">{{ row.employee.currentServiceName }}</td>{% endif %}
+                                <td class="text-end fw-semibold">{{ row.getMontantFormate() }}</td>
+                            </tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ module == 'voyages' ? 5 : (service ? 3 : 4) }}" class="text-center text-muted py-4">Aucun element valide.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if module == 'voyages' %}
+        <div class="rd-card p-0 rd-anim rd-anim-delay-190">
+            <div class="d-flex justify-content-between align-items-center px-3 px-md-4 py-3 rd-card-head">
+                <div class="fw-semibold"><i class="fas fa-triangle-exclamation me-2"></i>Rejetes</div>
+                <span class="rd-chip">{{ rejected|length }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table rd-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Collaborateur</th>
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in rejected %}
+                            <tr>
+                                <td>{{ v.employee ? v.employee.fullName : '-' }}</td>
+                                <td class="d-none d-md-table-cell">
+                                    {% if v.villeDepartAller and v.villeArriveeAller %}
+                                        {{ v.villeDepartAller }} → {{ v.villeArriveeAller }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small"><span class="text-muted">Depart:</span> {{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '-' }}</div>
+                                    <div class="small"><span class="text-muted">Retour:</span> {{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '-' }}</div>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if v.distanceKm and v.distanceKm > 0 %}
+                                        <span class="badge text-bg-info">{{ v.distanceKm|round }} km</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Aucun deplacement rejete.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+

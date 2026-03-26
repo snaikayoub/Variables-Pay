@@ -1,0 +1,161 @@
+{# templates/gestionnaire/g_dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+	<div class="container py-5 dash-scope">
+		{# Flash messages #}
+		{% for type, messages in app.flashes %}
+			{% for message in messages %}
+				<div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+					<i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : 'check-circle' }} me-2"></i>
+					{{ message }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		<div class="row g-4 mb-4">
+			<div class="col-lg-6">
+				<div class="dash-hero p-4 p-md-5 h-100">
+					<h1 class="dash-title fw-bold mb-1">{{ app.user.fullName|default('Gestionnaire') }}</h1>
+					<div class="dash-subtitle">Tableau de bord gestionnaire</div>
+					<div class="mt-4 dash-muted">
+						Suivi rapide: collaborateurs geres, periodes ouvertes, et acces aux modules.
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="dash-hero p-4 p-md-5 h-100">
+					<div class="d-flex justify-content-between align-items-start mb-3">
+						<div>
+							<div class="dash-subtitle">Apercu gestion</div>
+							<div class="dash-title fw-bold fs-5">Collaborateurs & periodes</div>
+						</div>
+						<div class="kpi-icon" aria-hidden="true"><i class="fas fa-calendar-alt"></i></div>
+					</div>
+					<div class="row g-3">
+						<div class="col-12 col-md-6">
+							<div class="kpi p-3 h-100">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<div class="kpi-label">Mensuelle</div>
+										<div class="kpi-value">{{ collaborateurs_mensuelle_count|default(0) }}</div>
+										<div class="kpi-label">collaborateurs geres</div>
+									</div>
+									<div class="kpi-icon kpi-icon--perf"><i class="fas fa-users"></i></div>
+								</div>
+								<hr class="my-3 dash-hr">
+								<div class="kpi-label">Periode ouverte</div>
+								<div class="fw-semibold">{{ periode_mensuelle_ouverte ? periode_mensuelle_ouverte : 'Aucune' }}</div>
+							</div>
+						</div>
+						<div class="col-12 col-md-6">
+							<div class="kpi p-3 h-100">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<div class="kpi-label">Quinzaine</div>
+										<div class="kpi-value">{{ collaborateurs_quinzaine_count|default(0) }}</div>
+										<div class="kpi-label">collaborateurs geres</div>
+									</div>
+									<div class="kpi-icon kpi-icon--trip"><i class="fas fa-users"></i></div>
+								</div>
+								<hr class="my-3 dash-hr">
+								<div class="kpi-label">Periode ouverte</div>
+								<div class="fw-semibold">{{ periode_quinzaine_ouverte ? periode_quinzaine_ouverte : 'Aucune' }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row g-4">
+			<div class="col-lg-4">
+				<div class="module p-4">
+					<div class="module-head mb-3">
+						<div class="module-badge module-badge--perf">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<div>
+							<h5 class="module-title">Prime de performance</h5>
+						</div>
+					</div>
+					<div class="mt-3">
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Soumis</span><span class="badge text-bg-light">{{ primePerformanceCounts.soumis|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Rejetes</span><span class="badge text-bg-light">{{ primePerformanceCounts.rejete|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (service)</span><span class="badge text-bg-light">{{ primePerformanceCounts.valide_service|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (division)</span><span class="badge text-bg-light">{{ primePerformanceCounts.valide_division|default(0) }}</span></div>
+					</div>
+					<div class="module-actions d-grid gap-2 mt-3">
+						<div class="d-grid gap-2 dash-grid-2">
+							<a href="{{ path('gestionnaire_saisie_performance', { type: 'mensuelle' }) }}" class="btn btn-primary">Mensuelle</a>
+							<a href="{{ path('gestionnaire_saisie_performance', { type: 'quinzaine' }) }}" class="btn btn-outline-primary">Quinzaine</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-4">
+				<div class="module p-4">
+					<div class="module-head mb-3">
+						<div class="module-badge module-badge--fonc">
+							<i class="fas fa-id-badge"></i>
+						</div>
+						<div>
+							<h5 class="module-title">Prime de fonction</h5>
+						</div>
+					</div>
+					<div class="mt-3">
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Soumis</span><span class="badge text-bg-light">{{ primeFonctionCounts.soumis|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Rejetes</span><span class="badge text-bg-light">{{ primeFonctionCounts.rejete|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (service)</span><span class="badge text-bg-light">{{ primeFonctionCounts.valide_service|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (division)</span><span class="badge text-bg-light">{{ primeFonctionCounts.valide_division|default(0) }}</span></div>
+					</div>
+					<div class="module-actions d-grid gap-2 mt-3">
+						<div class="d-grid gap-2 dash-grid-2">
+							<a href="{{ path('gestionnaire_saisie_fonction', { type: 'mensuelle' }) }}" class="btn btn-dark">Mensuelle</a>
+							<a href="{{ path('gestionnaire_saisie_fonction', { type: 'quinzaine' }) }}" class="btn btn-outline-dark">Quinzaine</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-4">
+				<div class="module p-4 position-relative">
+					<a href="{{ path('voyage_list') }}" class="stretched-link" aria-label="Ouvrir la liste des deplacements"></a>
+					<div class="module-head mb-3">
+						<div class="module-badge module-badge--trip">
+							<i class="fas fa-route"></i>
+						</div>
+						<div>
+							<h5 class="module-title">Deplacements</h5>
+							<p class="module-desc">Creer une mission, corriger un rejet, suivre le statut.</p>
+						</div>
+					</div>
+					<div class="mt-3">
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Saisies</span><span class="badge text-bg-light">{{ deplacementsCounts.saisie|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Soumis</span><span class="badge text-bg-light">{{ deplacementsCounts.soumis|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Rejetes</span><span class="badge text-bg-light">{{ deplacementsCounts.rejete|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (service)</span><span class="badge text-bg-light">{{ deplacementsCounts.valide_service|default(0) }}</span></div>
+						<div class="d-flex justify-content-between py-1"><span class="module-meta">Valides (division)</span><span class="badge text-bg-light">{{ deplacementsCounts.valide_division|default(0) }}</span></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{# Info si aucune donnée #}
+		{% if (collaborateurs_count|default(0)) == 0 %}
+			<div class="row mt-4">
+				<div class="col-12">
+					<div class="alert alert-info text-center">
+						<i class="fas fa-info-circle fa-2x mb-3"></i>
+						<h5>Aucun service assigné</h5>
+						<p class="mb-0">Vous n'avez aucun service assigné pour le moment. Contactez l'administrateur pour configurer vos permissions.</p>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}{% endblock %}

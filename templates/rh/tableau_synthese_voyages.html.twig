@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Synthese RH - Deplacements{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h2>Synthese - deplacements</h2>
+
+    <form method="get" class="row g-3 mb-3">
+        <div class="col-md-3">
+            <select name="periode" class="form-select">
+                <option value="">Toutes periodes</option>
+                {% for p in periodes %}
+                    <option value="{{ p.id }}" {{ p.id == periodeId ? 'selected' : '' }}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="division" class="form-select">
+                <option value="">Toutes divisions</option>
+                {% for d in divisions %}
+                    <option value="{{ d.id }}" {{ d.id == divisionId ? 'selected' : '' }}>{{ d.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="statut" class="form-select">
+                <option value="">Tous statuts</option>
+                <option value="draft" {{ statut == 'draft' ? 'selected' : '' }}>En brouillon</option>
+                <option value="submitted" {{ statut == 'submitted' ? 'selected' : '' }}>Soumis</option>
+                <option value="service_validated" {{ statut == 'service_validated' ? 'selected' : '' }}>Valide Service</option>
+                <option value="validated" {{ statut == 'validated' ? 'selected' : '' }}>Valide Division</option>
+                <option value="rejected" {{ statut == 'rejected' ? 'selected' : '' }}>Rejete</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex">
+            <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+            <a href="{{ path('rh_tableau_synthese_voyages_export_excel', app.request.query.all) }}" class="btn btn-outline-success me-2">Export Excel</a>
+            <a href="{{ path('rh_tableau_synthese_voyages_export_pdf', app.request.query.all) }}" class="btn btn-outline-danger">Export PDF</a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-sm align-middle">
+        <thead>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Periode</th>
+                <th>Division</th>
+                <th>Service</th>
+                <th>Statut</th>
+                <th>Transport</th>
+                <th>Depart</th>
+                <th>Retour</th>
+                <th>Distance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in voyages %}
+                <tr>
+                    <td>{{ v.employee ? v.employee.matricule : '' }}</td>
+                    <td>{{ v.employee ? v.employee.getFullName() : '' }}</td>
+                    <td>{{ v.periodePaie }}</td>
+                    <td>{{ v.employee.employeeSituations[0].service.division.nom ?? '' }}</td>
+                    <td>{{ v.employee.employeeSituations[0].service.nom ?? '' }}</td>
+                    <td>{{ v.status|capitalize }}</td>
+                    <td>{{ v.modeTransport }}</td>
+                    <td>{{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '' }}</td>
+                    <td>{{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '' }}</td>
+                    <td>{{ v.distanceKm ? (v.distanceKm|round ~ ' km') : '' }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="10" class="text-center">Aucune donnee.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('rh_dashboard') }}" class="btn btn-outline-secondary">Retour</a>
+</div>
+{% endblock %}

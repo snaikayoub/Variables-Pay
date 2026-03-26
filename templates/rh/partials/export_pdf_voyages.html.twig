@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export PDF - Synthese RH (deplacements)</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #222; padding: 2px 4px; }
+        th { background: #e2e2e2; }
+    </style>
+</head>
+<body>
+    <h2>Synthese RH - Deplacements</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Periode</th>
+            <th>Division</th>
+            <th>Service</th>
+            <th>Statut</th>
+            <th>Transport</th>
+            <th>Depart</th>
+            <th>Retour</th>
+            <th>Distance</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for v in voyages %}
+            <tr>
+                <td>{{ v.employee ? v.employee.matricule : '' }}</td>
+                <td>{{ v.employee ? v.employee.getFullName() : '' }}</td>
+                <td>{{ v.periodePaie }}</td>
+                <td>{{ v.employee.employeeSituations[0].service.division.nom ?? '' }}</td>
+                <td>{{ v.employee.employeeSituations[0].service.nom ?? '' }}</td>
+                <td>{{ v.status|capitalize }}</td>
+                <td>{{ v.modeTransport }}</td>
+                <td>{{ v.dateHeureDepart ? v.dateHeureDepart|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ v.dateHeureRetour ? v.dateHeureRetour|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ v.distanceKm ? (v.distanceKm|round ~ ' km') : '' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="10">Aucune donnee.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

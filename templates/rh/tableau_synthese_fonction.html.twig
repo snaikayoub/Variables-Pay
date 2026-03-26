@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Synthese RH - Prime de fonction{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h2>Synthese des primes de fonction</h2>
+
+    <form method="get" class="row g-3 mb-3">
+        <div class="col-md-3">
+            <select name="periode" class="form-select">
+                <option value="">Toutes periodes</option>
+                {% for p in periodes %}
+                    <option value="{{ p.id }}" {{ p.id == periodeId ? 'selected' : '' }}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="division" class="form-select">
+                <option value="">Toutes divisions</option>
+                {% for d in divisions %}
+                    <option value="{{ d.id }}" {{ d.id == divisionId ? 'selected' : '' }}>{{ d.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="statut" class="form-select">
+                <option value="">Tous statuts</option>
+                <option value="draft" {{ statut == 'draft' ? 'selected' : '' }}>En brouillon</option>
+                <option value="submitted" {{ statut == 'submitted' ? 'selected' : '' }}>Soumise</option>
+                <option value="service_validated" {{ statut == 'service_validated' ? 'selected' : '' }}>Validee Service</option>
+                <option value="division_validated" {{ statut == 'division_validated' ? 'selected' : '' }}>Validee Division</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex">
+            <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+            <a href="{{ path('rh_tableau_synthese_fonction_export_excel', app.request.query.all) }}" class="btn btn-outline-success me-2">Export Excel</a>
+            <a href="{{ path('rh_tableau_synthese_fonction_export_pdf', app.request.query.all) }}" class="btn btn-outline-danger">Export PDF</a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-sm align-middle">
+        <thead>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Periode</th>
+                <th>Division</th>
+                <th>Service</th>
+                <th>Statut</th>
+                <th>Taux</th>
+                <th>Jours</th>
+                <th>Note</th>
+                <th>Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pf in primes %}
+                <tr>
+                    <td>{{ pf.employee.matricule }}</td>
+                    <td>{{ pf.employee.getFullName() }}</td>
+                    <td>{{ pf.periodePaie }}</td>
+                    <td>{{ pf.employee.employeeSituations[0].service.division.nom ?? '' }}</td>
+                    <td>{{ pf.employee.employeeSituations[0].service.nom ?? '' }}</td>
+                    <td>{{ pf.status|capitalize }}</td>
+                    <td>{{ pf.tauxMonetaireFonction }}</td>
+                    <td>{{ pf.nombreJours }}</td>
+                    <td>{{ pf.noteHierarchique }}</td>
+                    <td>{{ pf.getMontantFormate() }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="10" class="text-center">Aucune donnee.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

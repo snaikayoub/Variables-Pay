@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}RH – Tableau de bord{% endblock %}
+
+{% block body %}
+<div class="container py-4 rd-page">
+    <div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="rd-chip"><i class="fas fa-people-roof"></i> RH</span>
+                        <span class="rd-chip">Pilotage paie & validations</span>
+                    </div>
+                    <h1 class="rd-title h3 mb-1">Tableau de bord</h1>
+                    <div class="rd-subtle">Vue globale sur primes, deplacements, periodes et divisions.</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 justify-content-end align-items-center">
+                    <span class="rd-chip"><span class="rd-kpi-num">{{ divisions|length }}</span> divisions</span>
+                    <span class="rd-chip"><span class="rd-kpi-num">{{ servicesTotal|default(0) }}</span> services</span>
+                    <span class="rd-chip"><i class="fas fa-calendar-alt"></i> Mensuelle: {{ periodeMensuelleOuverte ? periodeMensuelleOuverte : 'Aucune' }}</span>
+                    <span class="rd-chip"><i class="fas fa-calendar-week"></i> Quinzaine: {{ periodeQuinzaineOuverte ? periodeQuinzaineOuverte : 'Aucune' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="rd-card p-4 h-100 rd-anim rd-anim-delay-70 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="rd-chip"><i class="fas fa-coins"></i> Performance</div>
+                        <h2 class="h5 mt-3 mb-1">Primes de performance</h2>
+                        <div class="rd-subtle small">Suivi global des statuts.</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="rd-subtle small">Total</div>
+                        <div class="h4 mb-0 fw-bold">{{ stats.draft + stats.submitted + stats.service_validated + stats.division_validated }}</div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Brouillons</span><span class="rd-chip">{{ stats.draft }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Soumises</span><span class="rd-chip">{{ stats.submitted }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Validees service</span><span class="rd-chip">{{ stats.service_validated }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Validees division</span><span class="rd-chip">{{ stats.division_validated }}</span></div>
+                </div>
+                <div class="d-grid gap-2 mt-auto pt-4">
+                    <a href="{{ path('rh_tableau_synthese') }}" class="btn btn-primary rd-btn">Ouvrir synthese</a>
+                    <a href="{{ path('rh_etat_validations') }}" class="btn btn-outline-primary rd-btn">Etat validations</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="rd-card p-4 h-100 rd-anim rd-anim-delay-110 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="rd-chip"><i class="fas fa-id-badge"></i> Fonction</div>
+                        <h2 class="h5 mt-3 mb-1">Primes de fonction</h2>
+                        <div class="rd-subtle small">Suivi global des statuts.</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="rd-subtle small">Total</div>
+                        <div class="h4 mb-0 fw-bold">{{ fonctionStats.draft + fonctionStats.submitted + fonctionStats.service_validated + fonctionStats.division_validated }}</div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Brouillons</span><span class="rd-chip">{{ fonctionStats.draft }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Soumises</span><span class="rd-chip">{{ fonctionStats.submitted }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Validees service</span><span class="rd-chip">{{ fonctionStats.service_validated }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Validees division</span><span class="rd-chip">{{ fonctionStats.division_validated }}</span></div>
+                </div>
+                <div class="d-grid gap-2 mt-auto pt-4">
+                    <a href="{{ path('rh_tableau_synthese_fonction') }}" class="btn btn-dark rd-btn">Ouvrir synthese</a>
+                    <a href="{{ path('rh_etat_validations') }}" class="btn btn-outline-dark rd-btn">Etat validations</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="rd-card p-4 h-100 rd-anim rd-anim-delay-150 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="rd-chip"><i class="fas fa-route"></i> Deplacements</div>
+                        <h2 class="h5 mt-3 mb-1">Missions / deplacements</h2>
+                        <div class="rd-subtle small">Suivi global des statuts.</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="rd-subtle small">Total</div>
+                        <div class="h4 mb-0 fw-bold">{{ voyageStats.draft + voyageStats.submitted + voyageStats.service_validated + voyageStats.validated + voyageStats.rejected }}</div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Brouillons</span><span class="rd-chip">{{ voyageStats.draft }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Soumis</span><span class="rd-chip">{{ voyageStats.submitted }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Valides service</span><span class="rd-chip">{{ voyageStats.service_validated }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Valides division</span><span class="rd-chip">{{ voyageStats.validated }}</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="rd-subtle">Rejetes</span><span class="rd-chip">{{ voyageStats.rejected }}</span></div>
+                </div>
+                <div class="d-grid gap-2 mt-auto pt-4">
+                    <a href="{{ path('rh_tableau_synthese_voyages') }}" class="btn btn-info rd-btn">Ouvrir synthese</a>
+                    <a href="{{ path('rh_etat_validations') }}" class="btn btn-outline-info rd-btn">Etat validations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

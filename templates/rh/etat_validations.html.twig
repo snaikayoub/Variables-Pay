@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Etat des validations – RH{% endblock %}
+
+{% block body %}
+<div class="container py-4 rd-page">
+    <div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="rd-chip"><i class="fas fa-diagram-project"></i> RH</span>
+                        <span class="rd-chip">Etat des validations</span>
+                        <span class="rd-chip">{{ type == 'all' ? 'Toutes periodes' : type|capitalize }}</span>
+                    </div>
+                    <h1 class="rd-title h3 mb-1">Etat par division & service</h1>
+                    <div class="rd-subtle">Vue pipeline: a valider (service/division) et deja valides.</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-secondary rd-btn" href="{{ path('rh_dashboard') }}">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <form class="mt-4 rd-kpi p-3" method="get" action="{{ path('rh_etat_validations') }}">
+                <div class="row g-2 align-items-end">
+                    <div class="col-sm-6 col-md-4">
+                        <label class="form-label rd-subtle small mb-1">Type de paie</label>
+                        <select class="form-select" name="type">
+                            <option value="all" {{ type == 'all' ? 'selected' : '' }}>Toutes</option>
+                            <option value="mensuelle" {{ type == 'mensuelle' ? 'selected' : '' }}>Mensuelle</option>
+                            <option value="quinzaine" {{ type == 'quinzaine' ? 'selected' : '' }}>Quinzaine</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <button class="btn btn-dark rd-btn w-100" type="submit"><i class="fas fa-filter me-1"></i>Filtrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="accordion rd-anim rd-anim-delay-70" id="acc-divisions">
+        {% for row in etat %}
+            {% set d = row.division %}
+            {% set tpp = row.totals.performance %}
+            {% set tpf = row.totals.fonction %}
+            {% set tv = row.totals.voyages %}
+
+            <div class="accordion-item rd-card rd-acc-item mb-3">
+                <h2 class="accordion-header" id="h{{ d.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c{{ d.id }}" aria-expanded="false" aria-controls="c{{ d.id }}">
+                        <div class="w-100 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">{{ d.nom }}</div>
+                                <div class="rd-subtle small">{{ row.services|length }} service(s)</div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="rd-chip"><i class="fas fa-coins"></i> Perf: Svc {{ tpp.submitted }} | Div {{ tpp.service_validated }} | OK {{ tpp.division_validated }}</span>
+                                <span class="rd-chip"><i class="fas fa-id-badge"></i> Fonc: Svc {{ tpf.submitted }} | Div {{ tpf.service_validated }} | OK {{ tpf.division_validated }}</span>
+                                <span class="rd-chip"><i class="fas fa-route"></i> Dep: Svc {{ tv.submitted }} | Div {{ tv.service_validated }} | OK {{ tv.validated }} | R {{ tv.rejected }}</span>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="c{{ d.id }}" class="accordion-collapse collapse" aria-labelledby="h{{ d.id }}" data-bs-parent="#acc-divisions">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table rd-table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th class="rd-minw-260">Performance</th>
+                                        <th class="rd-minw-260">Fonction</th>
+                                        <th class="rd-minw-300">Deplacements</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for srow in row.services %}
+                                        {% set pp_total = srow.performance.submitted + srow.performance.service_validated + srow.performance.division_validated %}
+                                        {% set pf_total = srow.fonction.submitted + srow.fonction.service_validated + srow.fonction.division_validated %}
+                                        {% set v_total = srow.voyages.submitted + srow.voyages.service_validated + srow.voyages.validated + srow.voyages.rejected %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ srow.service.nom }}</td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                                    <span class="badge text-bg-warning">Svc: {{ srow.performance.submitted }}</span>
+                                                    <span class="badge text-bg-info">Div: {{ srow.performance.service_validated }}</span>
+                                                    <span class="badge text-bg-success">OK: {{ srow.performance.division_validated }}</span>
+                                                    <span class="badge text-bg-light text-dark">Total: {{ pp_total }}</span>
+                                                </div>
+                                                <div class="progress rd-progress">
+                                                    {% if pp_total > 0 %}
+                                                        <div class="progress-bar bg-warning" style="width: {{ (srow.performance.submitted / pp_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-info" style="width: {{ (srow.performance.service_validated / pp_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-success" style="width: {{ (srow.performance.division_validated / pp_total * 100)|round }}%"></div>
+                                                    {% else %}
+                                                        <div class="progress-bar bg-secondary" style="width: 100%"></div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                                    <span class="badge text-bg-warning">Svc: {{ srow.fonction.submitted }}</span>
+                                                    <span class="badge text-bg-info">Div: {{ srow.fonction.service_validated }}</span>
+                                                    <span class="badge text-bg-success">OK: {{ srow.fonction.division_validated }}</span>
+                                                    <span class="badge text-bg-light text-dark">Total: {{ pf_total }}</span>
+                                                </div>
+                                                <div class="progress rd-progress">
+                                                    {% if pf_total > 0 %}
+                                                        <div class="progress-bar bg-warning" style="width: {{ (srow.fonction.submitted / pf_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-info" style="width: {{ (srow.fonction.service_validated / pf_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-success" style="width: {{ (srow.fonction.division_validated / pf_total * 100)|round }}%"></div>
+                                                    {% else %}
+                                                        <div class="progress-bar bg-secondary" style="width: 100%"></div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                                    <span class="badge text-bg-warning">Svc: {{ srow.voyages.submitted }}</span>
+                                                    <span class="badge text-bg-info">Div: {{ srow.voyages.service_validated }}</span>
+                                                    <span class="badge text-bg-success">OK: {{ srow.voyages.validated }}</span>
+                                                    <span class="badge text-bg-danger">R: {{ srow.voyages.rejected }}</span>
+                                                    <span class="badge text-bg-light text-dark">Total: {{ v_total }}</span>
+                                                </div>
+                                                <div class="progress rd-progress">
+                                                    {% if v_total > 0 %}
+                                                        <div class="progress-bar bg-warning" style="width: {{ (srow.voyages.submitted / v_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-info" style="width: {{ (srow.voyages.service_validated / v_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-success" style="width: {{ (srow.voyages.validated / v_total * 100)|round }}%"></div>
+                                                        <div class="progress-bar bg-danger" style="width: {{ (srow.voyages.rejected / v_total * 100)|round }}%"></div>
+                                                    {% else %}
+                                                        <div class="progress-bar bg-secondary" style="width: 100%"></div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="4" class="text-center text-muted py-4">Aucun service.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="rd-card p-4 text-center text-muted">Aucune division enregistree.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

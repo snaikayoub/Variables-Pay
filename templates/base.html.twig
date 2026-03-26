@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title>
+			{% block title %}Variables-Pay
+			{% endblock %}
+		</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link
+		rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><text y='1.2em' font-size='96'>👤</text></svg>">
+
+		{# Webpack Encore styles (Bootstrap + ton app.scss) #}
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('app') }}
+
+			<link rel="preconnect" href="https://fonts.googleapis.com">
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+			<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+		{% endblock %}
+	</head>
+
+	<body>
+
+		{# ✅ Navbar responsive Bootstrap #}
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="{{ path('home') }}">Variables-Pay</a>
+
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="mainNav">
+					<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+					{% if app.user %}
+						<li class="nav-item">
+							<span class="nav-link">Bonjour, {{ app.user.fullName|default(app.user.email) }}</span>
+						</li>
+						{% if is_granted('ROLE_ADMIN') %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('admin') }}">Admin</a>
+							</li>
+						{% elseif is_granted('ROLE_RH') %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('rh_dashboard') }}">RH</a>
+							</li>
+						{% elseif is_granted('ROLE_RESPONSABLE_DIVISION') %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('responsable_division_dashboard') }}">Division</a>
+							</li>
+						{% elseif is_granted('ROLE_RESPONSABLE_SERVICE') %}
+							<li class="nav-item">
+							<a class="nav-link" href="{{ path('responsable_service_dashboard') }}">Service</a>
+							</li>
+						{% elseif is_granted('ROLE_GESTIONNAIRE_SERVICE') %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('gestionnaire_dashboard') }}">Gestionnaire</a>
+							</li>
+						{% else %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('dashboard_collaborateur') }}">Mon espace</a>
+							</li>
+						{% endif %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
+						</li>
+					{% else %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+						</li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+		{# MESSAGES FLASH #}
+		{% for label, messages in app.flashes %}
+			{% for message in messages %}
+				{% set bs = label == 'success' ? 'success' : (label in ['danger','error'] ? 'danger' : (label == 'warning' ? 'warning' : 'info')) %}
+				<div class="alert alert-{{ bs }} alert-dismissible fade show" role="alert">
+					{{ message }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		{# ✅ Contenu principal #}
+		<main class="container mt-1 pt-1"> {% block body %}{% endblock %}
+			</main>
+
+			{# ✅ Footer simple #}
+			<footer class="text-center text-muted mt-5 py-3 border-top">
+				Variables-Pay ©
+				{{ "now"|date("Y") }}
+				– Tous droits réservés
+			</footer>
+
+			{# Webpack Encore scripts #}
+			{% block javascripts %}
+				{{ encore_entry_script_tags('app') }}
+			{% endblock %}
+
+		</body>
+	</html>

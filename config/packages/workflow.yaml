@@ -1,0 +1,97 @@
+framework:
+    workflows:
+        prime_performance:
+            type: 'state_machine'
+            supports: 'App\Entity\PrimePerformance'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            initial_marking: 'draft'
+            places:
+                - 'draft'
+                - 'submitted'
+                - 'service_validated'
+                - 'division_validated'
+            transitions:
+                submit:
+                    from: 'draft'
+                    to: 'submitted'
+                service_validate:
+                    from: 'submitted'
+                    to: 'service_validated'
+                division_validate:
+                    from: 'service_validated'
+                    to: 'division_validated'
+                retour_gestionnaire:
+                    from: 'submitted'
+                    to: 'draft'
+                retour_service:
+                    from: 'service_validated'
+                    to: 'submitted'
+                retour_division:
+                    from: 'division_validated'
+                    to: 'service_validated'
+
+        prime_fonction:
+            type: 'state_machine'
+            supports: 'App\Entity\PrimeFonction'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            initial_marking: 'draft'
+            places:
+                - 'draft'
+                - 'submitted'
+                - 'service_validated'
+                - 'division_validated'
+            transitions:
+                submit:
+                    from: 'draft'
+                    to: 'submitted'
+                service_validate:
+                    from: 'submitted'
+                    to: 'service_validated'
+                division_validate:
+                    from: 'service_validated'
+                    to: 'division_validated'
+                retour_gestionnaire:
+                    from: 'submitted'
+                    to: 'draft'
+                retour_service:
+                    from: 'service_validated'
+                    to: 'submitted'
+                retour_division:
+                    from: 'division_validated'
+                    to: 'service_validated'
+        voyage_deplacement:
+            type: 'state_machine'
+            supports: 'App\Entity\VoyageDeplacement'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            initial_marking: 'draft'
+            places:
+                - 'draft'
+                - 'submitted'
+                - 'service_validated'
+                - 'validated'
+                - 'rejected'
+            transitions:
+                submit:
+                    from: ['draft', 'rejected']
+                    to: 'submitted'
+                service_validate:
+                    from: 'submitted'
+                    to: 'service_validated'
+                division_validate:
+                    from: 'service_validated'
+                    to: 'validated'
+                reject:
+                    from: ['submitted', 'service_validated']
+                    to: 'rejected'
+                retour_gestionnaire:
+                    from: ['submitted', 'rejected']
+                    to: 'draft'
+                retour_service:
+                    from: 'service_validated'
+                    to: 'submitted'

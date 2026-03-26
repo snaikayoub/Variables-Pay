@@ -1,0 +1,170 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Deplacements (liste) #}
+
+{% block title %}Liste - deplacements{% endblock %}
+
+{% block body %}
+		<div class="container py-5">
+		{% if statusFilter is defined and statusFilter %}
+			<div class="alert alert-light border mb-3">
+				Filtre actif: <strong>{{ statusFilter|replace({'_':' '})|capitalize }}</strong>
+				<a class="ms-2" href="{{ path('voyage_list') }}">Reinitialiser</a>
+			</div>
+		{% endif %}
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+        <div>
+			<h1 class="fw-bold mb-1">Mes deplacements</h1>
+			<div class="text-muted">Creez, modifiez et suivez vos demandes de mission.</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <form method="get" action="{{ path('voyage_list') }}" class="d-flex align-items-center gap-2">
+                {% set currentStatus = statusFilter|default('') %}
+                <select name="status" class="form-select oc-w-220" aria-label="Filtrer par statut">
+                    <option value="" {{ currentStatus == '' ? 'selected' : '' }}>Tous les statuts</option>
+                    <option value="draft" {{ currentStatus == 'draft' ? 'selected' : '' }}>Brouillon</option>
+                    <option value="submitted" {{ currentStatus == 'submitted' ? 'selected' : '' }}>Soumis</option>
+                    <option value="service_validated" {{ currentStatus == 'service_validated' ? 'selected' : '' }}>Valide (service)</option>
+                    <option value="validated" {{ currentStatus == 'validated' ? 'selected' : '' }}>Valide (division)</option>
+                    <option value="rejected" {{ currentStatus == 'rejected' ? 'selected' : '' }}>Rejete</option>
+                </select>
+                <button type="submit" class="btn btn-outline-secondary">Filtrer</button>
+            </form>
+            <a href="{{ path('voyage_new', { type: 'mensuelle' }) }}" class="btn btn-primary">
+                Nouvelle (mensuelle)
+            </a>
+            <a href="{{ path('voyage_new', { type: 'quinzaine' }) }}" class="btn btn-outline-primary">
+                Nouvelle (quinzaine)
+            </a>
+            <a href="{{ path('gestionnaire_dashboard') }}" class="btn btn-outline-secondary">TABLEAU DE BORD</a>
+        </div>
+    </div>
+
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Collaborateur</th>
+                            <th class="d-none d-lg-table-cell">Periode</th>
+                            <th class="d-none d-md-table-cell">Trajet</th>
+                            <th>Dates</th>
+                            <th class="d-none d-lg-table-cell">Distance</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for voyage in voyages %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ voyage.employee ? voyage.employee.fullName : '-' }}</div>
+                                <div class="text-muted small">
+                                    {{ voyage.typeVoyage ? voyage.typeVoyage|capitalize : 'Mission' }}
+                                    {% if voyage.modeTransport %}• {{ voyage.modeTransport|capitalize }}{% endif %}
+                                </div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                <span class="text-muted">{{ voyage.periodePaie ? voyage.periodePaie : '-' }}</span>
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                {% if voyage.villeDepartAller and voyage.villeArriveeAller %}
+                                    <span class="text-muted">{{ voyage.villeDepartAller }}</span>
+                                    <span class="text-muted">→</span>
+                                    <span class="text-muted">{{ voyage.villeArriveeAller }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <span class="text-muted">Depart:</span>
+                                    {{ voyage.dateHeureDepart ? voyage.dateHeureDepart|date('d/m/Y H:i') : '-' }}
+                                </div>
+                                <div class="small">
+                                    <span class="text-muted">Retour:</span>
+                                    {{ voyage.dateHeureRetour ? voyage.dateHeureRetour|date('d/m/Y H:i') : '-' }}
+                                </div>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                {% if voyage.distanceKm and voyage.distanceKm > 0 %}
+                                    <span class="badge text-bg-info">{{ voyage.distanceKm|round }} km</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set badge_class = 'secondary' %}
+                                {% if voyage.status == 'draft' %}{% set badge_class = 'secondary' %}
+                                {% elseif voyage.status == 'submitted' %}{% set badge_class = 'primary' %}
+                                {% elseif voyage.status == 'service_validated' %}{% set badge_class = 'info' %}
+                                {% elseif voyage.status == 'validated' %}{% set badge_class = 'success' %}
+                                {% elseif voyage.status == 'rejected' %}{% set badge_class = 'danger' %}
+                                {% endif %}
+                                <span class="badge text-bg-{{ badge_class }}">{{ voyage.status|capitalize }}</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    {% if voyage.status == 'draft' or voyage.status == 'rejected' %}
+                                        <a href="{{ path('voyage_edit', { id: voyage.id }) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                            Modifier
+                                        </a>
+                                    {% endif %}
+
+                                    {% if voyage.status == 'draft' %}
+                                        <form method="post" action="{{ path('voyage_submit', { id: voyage.id }) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('voyage_submit_' ~ voyage.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Soumettre">
+                                                Soumettre
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if voyage.status == 'rejected' %}
+                                        <form method="post" action="{{ path('voyage_submit', { id: voyage.id }) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('voyage_submit_' ~ voyage.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Resoumettre">
+                                                Resoumettre
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if voyage.status == 'draft' or voyage.status == 'rejected' %}
+                                        <form method="post" action="{{ path('voyage_delete', { id: voyage.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer ce voyage ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_voyage_' ~ voyage.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted mb-3">Aucun voyage trouve.</div>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{{ path('voyage_new', { type: 'mensuelle' }) }}" class="btn btn-primary">Creer (mensuelle)</a>
+                                    <a href="{{ path('voyage_new', { type: 'quinzaine' }) }}" class="btn btn-outline-primary">Creer (quinzaine)</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

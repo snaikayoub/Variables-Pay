@@ -1,0 +1,110 @@
+{% extends 'responsable/_layout.html.twig' %}
+
+{% block title %}Responsable service{% endblock %}
+
+{% block rd_body %}
+	<div class="container">
+		<div class="rd-card rd-hero p-4 p-md-5 mb-4 rd-anim">
+			<div class="position-relative">
+				<div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+					<div>
+						<span class="rd-chip"><i class="fas fa-user-shield"></i> Responsable service</span>
+						<h1 class="rd-title h3 mb-1 mt-2">Tableau de bord</h1>
+						<div class="rd-subtle">Validation des primes et des deplacements, par type de paie.</div>
+					</div>
+					<div class="d-flex gap-2">
+						<a href="{{ path('app_logout') }}" class="btn btn-outline-secondary rd-btn">Deconnexion</a>
+					</div>
+				</div>
+
+				<div class="mt-4 rd-kpi p-3 p-md-4">
+					<div class="row g-3">
+						<div class="col-md-4">
+							<div class="rd-subtle small">Performance</div>
+							<div class="d-flex justify-content-between align-items-end">
+								<div class="rd-kpi-num h4 mb-0">{{ (countMensuelle|default(0) + countQuinzaine|default(0)) }}</div>
+								<div class="rd-subtle small">en attente</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="rd-subtle small">Fonction</div>
+							<div class="d-flex justify-content-between align-items-end">
+								<div class="rd-kpi-num h4 mb-0">{{ (countFonctionMensuelle|default(0) + countFonctionQuinzaine|default(0)) }}</div>
+								<div class="rd-subtle small">en attente</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="rd-subtle small">Deplacements</div>
+							<div class="d-flex justify-content-between align-items-end">
+								<div class="rd-kpi-num h4 mb-0">{{ (countVoyageMensuelle|default(0) + countVoyageQuinzaine|default(0)) }}</div>
+								<div class="rd-subtle small">en attente</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row g-4">
+			<div class="col-lg-4">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-70">
+					<div class="d-flex justify-content-between align-items-start">
+						<div>
+							<div class="rd-chip"><i class="fas fa-coins"></i> Performance</div>
+							<h2 class="h5 mt-3 mb-1">Primes de performance</h2>
+							<div class="rd-subtle small">En attente de validation service.</div>
+						</div>
+						<div class="text-end">
+							<div class="rd-subtle small">Total</div>
+							<div class="h4 mb-0 fw-bold">{{ (countMensuelle|default(0) + countQuinzaine|default(0)) }}</div>
+						</div>
+					</div>
+					<div class="mt-4 d-grid gap-2">
+						<a href="{{ path('responsable_service_validation_performance', { type: 'mensuelle' }) }}" class="btn btn-primary rd-btn">Mensuelle ({{ countMensuelle|default(0) }})</a>
+						<a href="{{ path('responsable_service_validation_performance', { type: 'quinzaine' }) }}" class="btn btn-outline-primary rd-btn">Quinzaine ({{ countQuinzaine|default(0) }})</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-4">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-110">
+					<div class="d-flex justify-content-between align-items-start">
+						<div>
+							<div class="rd-chip"><i class="fas fa-id-badge"></i> Fonction</div>
+							<h2 class="h5 mt-3 mb-1">Primes de fonction</h2>
+							<div class="rd-subtle small">En attente de validation service.</div>
+						</div>
+						<div class="text-end">
+							<div class="rd-subtle small">Total</div>
+							<div class="h4 mb-0 fw-bold">{{ (countFonctionMensuelle|default(0) + countFonctionQuinzaine|default(0)) }}</div>
+						</div>
+					</div>
+					<div class="mt-4 d-grid gap-2">
+						<a href="{{ path('responsable_service_validation_fonction', { type: 'mensuelle' }) }}" class="btn btn-dark rd-btn">Mensuelle ({{ countFonctionMensuelle|default(0) }})</a>
+						<a href="{{ path('responsable_service_validation_fonction', { type: 'quinzaine' }) }}" class="btn btn-outline-dark rd-btn">Quinzaine ({{ countFonctionQuinzaine|default(0) }})</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-4">
+				<div class="rd-card p-4 h-100 rd-anim rd-anim-delay-150">
+					<div class="d-flex justify-content-between align-items-start">
+						<div>
+							<div class="rd-chip"><i class="fas fa-route"></i> Deplacements</div>
+							<h2 class="h5 mt-3 mb-1">Missions / deplacements</h2>
+							<div class="rd-subtle small">En attente de validation service.</div>
+						</div>
+						<div class="text-end">
+							<div class="rd-subtle small">Total</div>
+							<div class="h4 mb-0 fw-bold">{{ (countVoyageMensuelle|default(0) + countVoyageQuinzaine|default(0)) }}</div>
+						</div>
+					</div>
+					<div class="mt-4 d-grid gap-2">
+						<a href="{{ path('responsable_service_validation_voyages', { type: 'mensuelle' }) }}" class="btn btn-info rd-btn">Mensuelle ({{ countVoyageMensuelle|default(0) }})</a>
+						<a href="{{ path('responsable_service_validation_voyages', { type: 'quinzaine' }) }}" class="btn btn-outline-info rd-btn">Quinzaine ({{ countVoyageQuinzaine|default(0) }})</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

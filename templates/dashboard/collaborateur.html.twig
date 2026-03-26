@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Espace
+{% endblock %}
+
+{% block body %}
+	<h1>Bienvenue,
+		{{ app.user.fullName }}</h1>
+	<p>Suivi de votre paie :</p>
+	<ul>
+		<li>Consulter vos éléments variables</li>
+		<li>Voir l’état de validation</li>
+	</ul>
+{% endblock %}

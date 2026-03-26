@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports et statistiques{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">
+            <i class="fas fa-chart-bar text-warning me-2"></i>Rapports et statistiques
+        </h1>
+        <a href="{{ path('gestionnaire_dashboard') }}" class="btn btn-outline-secondary">
+            TABLEAU DE BORD
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body text-center text-muted py-5">
+            <i class="fas fa-chart-pie fs-1 mb-3"></i>
+            <p class="fs-5">Les rapports et statistiques de votre équipe seront affichés ici.</p>
+            <p>Cette fonctionnalité est en cours de développement.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

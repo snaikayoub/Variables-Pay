@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Prime de performance (creation) #}
+
+{% block title %}Nouvelle prime de performance{% endblock %}
+
+{% block body %}
+	<h1>Nouvelle prime de performance</h1>
+
+	{{ form_start(form) }}
+	{{ form_row(form.employee) }}
+	{{ form_row(form.periodePaie) }}
+	{{ form_row(form.groupePerf) }}
+	{{ form_row(form.tauxMonaitaire) }}
+	{{ form_row(form.joursPerf) }}
+	{{ form_row(form.scoreEquipe) }}
+	{{ form_row(form.scoreCollectif) }}
+	{{ form_row(form.noteHierarchique) }}
+	<button class="btn btn-primary mt-3">Enregistrer</button>
+	{{ form_end(form) }}
+{% endblock %}

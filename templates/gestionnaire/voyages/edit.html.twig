@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{# Module: Deplacements (edition) #}
+
+{% block title %}Modifier la mission / déplacement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'gestionnaire/voyages/_voyage_assets.html.twig' %}
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <div class="mb-4">
+        <h1 class="fw-bold mb-1">Modifier la mission / déplacement</h1>
+        <div class="text-muted">Modifiez les informations de déplacement du collaborateur.</div>
+    </div>
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% set localTypePaie = voyage.periodePaie ? voyage.periodePaie.typePaie : null %}
+    {% set canResubmit = voyage.status in ['draft', 'rejected'] %}
+    {% include 'gestionnaire/voyages/_form.html.twig' with { form: form, typePaie: localTypePaie, showSubmit: canResubmit } %}
+</div>
+{% endblock %}

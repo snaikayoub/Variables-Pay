@@ -1,0 +1,284 @@
+<script>
+(() => {
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function parseFloatOrNull(v) {
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? n : null;
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    async function routeDistanceKm(lat1, lon1, lat2, lon2) {
+        try {
+            const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data && data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                return data.routes[0].distance / 1000;
+            }
+        } catch (e) {
+            // ignore and fallback
+        }
+        return haversineKm(lat1, lon1, lat2, lon2);
+    }
+
+    function formatDisplayName(result) {
+        const address = result.address || {};
+        const parts = [];
+
+        let city = address.city || address.town || address.village || result.name;
+        if (city) {
+            city = city.replace(/Pachalik( de)?\s*/gi, '').trim();
+            parts.push(city);
+        }
+
+        if (address.state) {
+            const state = String(address.state).replace(/Pachalik( de)?\s*/gi, '').trim();
+            if (state && !parts.includes(state)) {
+                parts.push(state);
+            }
+        }
+
+        if (address.country && !parts.includes(address.country)) {
+            parts.push(address.country);
+        }
+
+        const formatted = parts.length > 0 ? parts.join(', ') : (result.display_name || '');
+        return formatted.replace(/Pachalik( de)?\s*/gi, '').replace(/^,\s*/, '').trim();
+    }
+
+    async function searchCity(query) {
+        if (!query || query.length < 3) return [];
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&addressdetails=1&accept-language=fr&countrycodes=ma`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'Accept-Language': 'fr-FR,fr;q=0.9'
+                }
+            });
+            const results = await res.json();
+            return (results || []).filter(r => {
+                const type = r.type;
+                const addressType = r.addresstype;
+                return ['city', 'town', 'village', 'municipality', 'administrative'].includes(type) ||
+                    ['city', 'town', 'village', 'municipality'].includes(addressType);
+            }).slice(0, 5);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function setHiddenCoords(prefix, lat, lon) {
+        const latEl = byId(`voyage_deplacement_lat${prefix}`);
+        const lonEl = byId(`voyage_deplacement_lon${prefix}`);
+        if (latEl) latEl.value = lat ?? '';
+        if (lonEl) lonEl.value = lon ?? '';
+    }
+
+    function getHiddenCoords(prefix) {
+        const latEl = byId(`voyage_deplacement_lat${prefix}`);
+        const lonEl = byId(`voyage_deplacement_lon${prefix}`);
+        return {
+            lat: latEl ? parseFloatOrNull(latEl.value) : null,
+            lon: lonEl ? parseFloatOrNull(lonEl.value) : null,
+        };
+    }
+
+    function showDistance(km) {
+        const info = byId('distance-info');
+        const value = byId('distance-value');
+        const field = byId('voyage_deplacement_distanceKm');
+        if (!info || !value || !field) return;
+
+        if (!km || km <= 0) {
+            info.hidden = true;
+            return;
+        }
+
+        const rounded = Math.round(km);
+        value.textContent = String(rounded);
+        field.value = String(rounded);
+        info.hidden = false;
+    }
+
+    async function updateTotalDistance() {
+        const a1 = getHiddenCoords('DepartAller');
+        const a2 = getHiddenCoords('ArriveeAller');
+        const r1 = getHiddenCoords('DepartRetour');
+        const r2 = getHiddenCoords('ArriveeRetour');
+
+        let total = 0;
+        if (a1.lat !== null && a2.lat !== null && a1.lon !== null && a2.lon !== null) {
+            total += await routeDistanceKm(a1.lat, a1.lon, a2.lat, a2.lon);
+        }
+        if (r1.lat !== null && r2.lat !== null && r1.lon !== null && r2.lon !== null) {
+            total += await routeDistanceKm(r1.lat, r1.lon, r2.lat, r2.lon);
+        }
+
+        showDistance(total);
+    }
+
+    function setupAutocomplete(inputId, suggestionsId, coordPrefix) {
+        const input = byId(inputId);
+        const box = byId(suggestionsId);
+        if (!input || !box) return;
+
+        let timer = null;
+
+        function close() {
+            box.hidden = true;
+            box.innerHTML = '';
+        }
+
+        input.addEventListener('input', () => {
+            window.clearTimeout(timer);
+
+            const query = input.value.trim();
+            if (query.length < 3) {
+                close();
+                return;
+            }
+
+            timer = window.setTimeout(async () => {
+                const results = await searchCity(query);
+                if (!results.length) {
+                    close();
+                    return;
+                }
+
+                box.innerHTML = results.map(r => {
+                    const display = formatDisplayName(r);
+                    return `<div data-suggestion data-lat="${r.lat}" data-lon="${r.lon}" data-display="${display.replace(/\"/g, '&quot;')}">${display}</div>`;
+                }).join('');
+                box.hidden = false;
+
+                box.querySelectorAll('[data-suggestion]').forEach(el => {
+                    el.addEventListener('click', async () => {
+                        const lat = parseFloatOrNull(el.getAttribute('data-lat'));
+                        const lon = parseFloatOrNull(el.getAttribute('data-lon'));
+                        const display = el.getAttribute('data-display') || '';
+
+                        input.value = display;
+                        setHiddenCoords(coordPrefix, lat, lon);
+                        close();
+                        await updateTotalDistance();
+                    }, { once: true });
+                });
+            }, 250);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !box.contains(e.target)) {
+                close();
+            }
+        });
+    }
+
+    function copyAllerToRetour() {
+        const departAller = byId('voyage_deplacement_villeDepartAller');
+        const arriveeAller = byId('voyage_deplacement_villeArriveeAller');
+        const departRetour = byId('voyage_deplacement_villeDepartRetour');
+        const arriveeRetour = byId('voyage_deplacement_villeArriveeRetour');
+        if (!departAller || !arriveeAller || !departRetour || !arriveeRetour) return;
+
+        departRetour.value = arriveeAller.value;
+        arriveeRetour.value = departAller.value;
+
+        const aDep = getHiddenCoords('DepartAller');
+        const aArr = getHiddenCoords('ArriveeAller');
+        setHiddenCoords('DepartRetour', aArr.lat, aArr.lon);
+        setHiddenCoords('ArriveeRetour', aDep.lat, aDep.lon);
+    }
+
+    function swap(scope) {
+        const isAller = scope === 'aller';
+        const fromId = isAller ? 'voyage_deplacement_villeDepartAller' : 'voyage_deplacement_villeDepartRetour';
+        const toId = isAller ? 'voyage_deplacement_villeArriveeAller' : 'voyage_deplacement_villeArriveeRetour';
+        const fromPrefix = isAller ? 'DepartAller' : 'DepartRetour';
+        const toPrefix = isAller ? 'ArriveeAller' : 'ArriveeRetour';
+
+        const from = byId(fromId);
+        const to = byId(toId);
+        if (!from || !to) return;
+
+        const tmp = from.value;
+        from.value = to.value;
+        to.value = tmp;
+
+        const c1 = getHiddenCoords(fromPrefix);
+        const c2 = getHiddenCoords(toPrefix);
+        setHiddenCoords(fromPrefix, c2.lat, c2.lon);
+        setHiddenCoords(toPrefix, c1.lat, c1.lon);
+    }
+
+    function validateDates() {
+        const depart = byId('voyage_deplacement_dateHeureDepart');
+        const retour = byId('voyage_deplacement_dateHeureRetour');
+        const warning = byId('voyage-date-warning');
+        const submitBtn = byId('voyage-submit-btn');
+        if (!depart || !retour || !warning || !submitBtn) return;
+
+        if (!depart.value || !retour.value) {
+            warning.hidden = true;
+            submitBtn.disabled = false;
+            return;
+        }
+
+        const d1 = new Date(depart.value);
+        const d2 = new Date(retour.value);
+        const invalid = Number.isFinite(d1.getTime()) && Number.isFinite(d2.getTime()) && d2 < d1;
+        warning.hidden = !invalid;
+        submitBtn.disabled = invalid;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const form = document.querySelector('form[data-voyage-form="1"]');
+        if (!form) return;
+
+        setupAutocomplete('voyage_deplacement_villeDepartAller', 'suggestions-depart-aller', 'DepartAller');
+        setupAutocomplete('voyage_deplacement_villeArriveeAller', 'suggestions-arrivee-aller', 'ArriveeAller');
+        setupAutocomplete('voyage_deplacement_villeDepartRetour', 'suggestions-depart-retour', 'DepartRetour');
+        setupAutocomplete('voyage_deplacement_villeArriveeRetour', 'suggestions-arrivee-retour', 'ArriveeRetour');
+
+        const distField = byId('voyage_deplacement_distanceKm');
+        if (distField) {
+            const existing = parseFloatOrNull(distField.value);
+            if (existing && existing > 0) {
+                showDistance(existing);
+            }
+        }
+
+        form.querySelectorAll('[data-action="voyage:copy-aller-to-retour"]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                copyAllerToRetour();
+                await updateTotalDistance();
+            });
+        });
+        form.querySelectorAll('[data-action="voyage:swap"]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                swap(btn.getAttribute('data-scope'));
+                await updateTotalDistance();
+            });
+        });
+
+        const depart = byId('voyage_deplacement_dateHeureDepart');
+        const retour = byId('voyage_deplacement_dateHeureRetour');
+        if (depart) depart.addEventListener('change', validateDates);
+        if (retour) retour.addEventListener('change', validateDates);
+        validateDates();
+    });
+})();
+</script>

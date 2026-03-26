@@ -1,0 +1,174 @@
+{{ form_start(form, { attr: { 'data-voyage-form': '1', 'autocomplete': 'off' } }) }}
+
+{# Nomenclature: on utilise "Deplacements" pour voyages/missions (module voyage_deplacement) #}
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                    <div>
+                        <div class="fw-semibold">Mission / deplacement</div>
+                        <div class="text-muted small">Infos generales + collaborateur</div>
+                    </div>
+                    {% if typePaie is defined and typePaie %}
+                        <span class="badge text-bg-light border">Paie: {{ typePaie|capitalize }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        {{ form_label(form.periodePaie) }}
+                        {{ form_widget(form.periodePaie) }}
+                        {{ form_errors(form.periodePaie) }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_label(form.employee) }}
+                        {{ form_widget(form.employee, { attr: { class: 'form-select' } }) }}
+                        {{ form_errors(form.employee) }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_label(form.typeVoyage) }}
+                        {{ form_widget(form.typeVoyage, { attr: { class: 'form-select' } }) }}
+                        {{ form_errors(form.typeVoyage) }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_label(form.modeTransport) }}
+                        {{ form_widget(form.modeTransport, { attr: { class: 'form-select' } }) }}
+                        {{ form_errors(form.modeTransport) }}
+                    </div>
+                    <div class="col-12">
+                        {{ form_label(form.motif) }}
+                        {{ form_widget(form.motif, { attr: { class: 'form-control', rows: 3, placeholder: 'Ex: reunion client, formation, intervention...' } }) }}
+                        {{ form_errors(form.motif) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                    <div>
+                        <div class="fw-semibold">Trajet aller</div>
+                        <div class="text-muted small">Depart + arrivee + date/heure</div>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Actions trajet">
+                        <button type="button" class="btn btn-outline-secondary" data-action="voyage:swap" data-scope="aller">Inverser</button>
+                        <button type="button" class="btn btn-outline-secondary" data-action="voyage:copy-aller-to-retour">Copier vers retour</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form_label(form.dateHeureDepart) }}
+                        {{ form_widget(form.dateHeureDepart, { attr: { class: (form.dateHeureDepart.vars.errors|length > 0) ? 'form-control is-invalid' : 'form-control' } }) }}
+                        {% if form.dateHeureDepart.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.dateHeureDepart) }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 position-relative">
+                        {{ form_label(form.villeDepartAller) }}
+                        {{ form_widget(form.villeDepartAller, { attr: { class: 'form-control', placeholder: 'Ex: Casablanca, Maroc' } }) }}
+                        {{ form_errors(form.villeDepartAller) }}
+                        <div id="suggestions-depart-aller" class="voyage-autocomplete" hidden></div>
+                    </div>
+                    <div class="col-md-4 position-relative">
+                        {{ form_label(form.villeArriveeAller) }}
+                        {{ form_widget(form.villeArriveeAller, { attr: { class: 'form-control', placeholder: 'Ex: Rabat, Maroc' } }) }}
+                        {{ form_errors(form.villeArriveeAller) }}
+                        <div id="suggestions-arrivee-aller" class="voyage-autocomplete" hidden></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="fw-semibold">Trajet retour</div>
+                <div class="text-muted small">Depart + arrivee + date/heure</div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form_label(form.dateHeureRetour) }}
+                        {{ form_widget(form.dateHeureRetour, { attr: { class: (form.dateHeureRetour.vars.errors|length > 0) ? 'form-control is-invalid' : 'form-control' } }) }}
+                        {% if form.dateHeureRetour.vars.errors|length > 0 %}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.dateHeureRetour) }}</div>
+                        {% endif %}
+                        <div class="invalid-feedback d-block" id="voyage-date-warning" hidden>
+                            La date/heure de retour doit etre apres le depart.
+                        </div>
+                    </div>
+                    <div class="col-md-4 position-relative">
+                        {{ form_label(form.villeDepartRetour) }}
+                        {{ form_widget(form.villeDepartRetour, { attr: { class: 'form-control', placeholder: 'Ex: Rabat, Maroc' } }) }}
+                        {{ form_errors(form.villeDepartRetour) }}
+                        <div id="suggestions-depart-retour" class="voyage-autocomplete" hidden></div>
+                    </div>
+                    <div class="col-md-4 position-relative">
+                        {{ form_label(form.villeArriveeRetour) }}
+                        {{ form_widget(form.villeArriveeRetour, { attr: { class: 'form-control', placeholder: 'Ex: Casablanca, Maroc' } }) }}
+                        {{ form_errors(form.villeArriveeRetour) }}
+                        <div id="suggestions-arrivee-retour" class="voyage-autocomplete" hidden></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="fw-semibold">Recap</div>
+                <div class="text-muted small">Distance estimee + commentaire</div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3" id="distance-info" hidden>
+                    <strong>Distance totale estimee:</strong>
+                    <span id="distance-value" class="fw-semibold">0</span> km
+                    <span class="text-muted">(calcul automatique)</span>
+                </div>
+
+                {{ form_widget(form.distanceKm) }}
+                {{ form_widget(form.latDepartAller) }}
+                {{ form_widget(form.lonDepartAller) }}
+                {{ form_widget(form.latArriveeAller) }}
+                {{ form_widget(form.lonArriveeAller) }}
+                {{ form_widget(form.latDepartRetour) }}
+                {{ form_widget(form.lonDepartRetour) }}
+                {{ form_widget(form.latArriveeRetour) }}
+                {{ form_widget(form.lonArriveeRetour) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.commentaire) }}
+                    {{ form_widget(form.commentaire, { attr: { class: 'form-control', rows: 2, placeholder: 'Optionnel: details, contraintes, remarques...' } }) }}
+                    {{ form_errors(form.commentaire) }}
+                </div>
+
+                {{ form_rest(form) }}
+
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <a href="{{ path('voyage_list') }}" class="btn btn-outline-secondary">Retour</a>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if showSubmit is defined and showSubmit %}
+                            <button type="submit" class="btn btn-outline-primary" name="save_only" value="1" id="voyage-submit-btn">Enregistrer</button>
+                            <button type="submit" class="btn btn-primary" name="save_and_submit" value="1" id="voyage-submit-submit-btn">Enregistrer et soumettre</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-primary" id="voyage-submit-btn">Enregistrer</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ form_end(form, { render_rest: false }) }}
