@@ -44,6 +44,15 @@ class VoyageItem {
     required this.employeeMatricule,
     required this.dateHeureDepart,
     required this.dateHeureRetour,
+    required this.modeTransport,
+    required this.distanceKm,
+    required this.prisEnCharge,
+    required this.villeDepartAller,
+    required this.villeArriveeAller,
+    required this.villeDepartRetour,
+    required this.villeArriveeRetour,
+    this.typeVoyage,
+    this.motif,
   });
 
   final int id;
@@ -53,6 +62,15 @@ class VoyageItem {
   final String employeeMatricule;
   final DateTime? dateHeureDepart;
   final DateTime? dateHeureRetour;
+  final String modeTransport;
+  final double? distanceKm;
+  final bool prisEnCharge;
+  final String? villeDepartAller;
+  final String? villeArriveeAller;
+  final String? villeDepartRetour;
+  final String? villeArriveeRetour;
+  final String? typeVoyage;
+  final String? motif;
 
   factory VoyageItem.fromJson(Map<String, dynamic> json) {
     final employee = json['employee'];
@@ -72,6 +90,15 @@ class VoyageItem {
       employeeMatricule: employeeMat.toString(),
       dateHeureDepart: parseDt(json['dateHeureDepart']),
       dateHeureRetour: parseDt(json['dateHeureRetour']),
+      modeTransport: (json['modeTransport'] ?? '') as String,
+      distanceKm: (json['distanceKm'] is num) ? (json['distanceKm'] as num).toDouble() : null,
+      prisEnCharge: json['prisEnCharge'] == true,
+      villeDepartAller: (json['villeDepartAller'] as String?)?.trim().isEmpty == true ? null : (json['villeDepartAller'] as String?),
+      villeArriveeAller: (json['villeArriveeAller'] as String?)?.trim().isEmpty == true ? null : (json['villeArriveeAller'] as String?),
+      villeDepartRetour: (json['villeDepartRetour'] as String?)?.trim().isEmpty == true ? null : (json['villeDepartRetour'] as String?),
+      villeArriveeRetour: (json['villeArriveeRetour'] as String?)?.trim().isEmpty == true ? null : (json['villeArriveeRetour'] as String?),
+      typeVoyage: (json['typeVoyage'] as String?)?.trim().isEmpty == true ? null : (json['typeVoyage'] as String?),
+      motif: (json['motif'] as String?)?.trim().isEmpty == true ? null : (json['motif'] as String?),
     );
   }
 }

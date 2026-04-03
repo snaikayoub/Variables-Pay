@@ -68,7 +68,11 @@
                         <tr>
                             <td>
                                 <div class="fw-semibold">{{ v.employee ? v.employee.fullName : '-' }}</div>
-                                <div class="text-muted small">{{ v.modeTransport ? v.modeTransport|capitalize : '' }}</div>
+                                <div class="text-muted small">
+                                    {{ v.modeTransport ? v.modeTransport|capitalize : '' }}
+                                    {% if v.modeTransport %}•{% endif %}
+                                    {{ v.prisEnCharge ? 'Pris en charge' : 'Non pris en charge' }}
+                                </div>
                             </td>
                             <td class="d-none d-md-table-cell">
                                 {% if v.villeDepartAller and v.villeArriveeAller %}

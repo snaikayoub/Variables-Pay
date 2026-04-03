@@ -131,6 +131,7 @@ final class GestionnaireVoyageController extends AbstractController
         $voyage->setDateHeureDepart($depart);
         $voyage->setDateHeureRetour($retour);
         $voyage->setDistanceKm(isset($payload['distanceKm']) ? (float) $payload['distanceKm'] : 0.0);
+        $voyage->setPrisEnCharge(isset($payload['prisEnCharge']) ? (bool) $payload['prisEnCharge'] : false);
         $voyage->setTypeVoyage(isset($payload['typeVoyage']) ? (string) $payload['typeVoyage'] : null);
         $voyage->setMotif(isset($payload['motif']) ? (string) $payload['motif'] : null);
 
@@ -215,6 +216,10 @@ final class GestionnaireVoyageController extends AbstractController
 
         if (array_key_exists('distanceKm', $payload)) {
             $voyage->setDistanceKm((float) $payload['distanceKm']);
+        }
+
+        if (array_key_exists('prisEnCharge', $payload)) {
+            $voyage->setPrisEnCharge((bool) $payload['prisEnCharge']);
         }
         if (array_key_exists('typeVoyage', $payload)) {
             $voyage->setTypeVoyage(null === $payload['typeVoyage'] ? null : (string) $payload['typeVoyage']);
@@ -355,6 +360,7 @@ final class GestionnaireVoyageController extends AbstractController
             'dateHeureDepart' => $voyage->getDateHeureDepart()?->format(DATE_ATOM),
             'dateHeureRetour' => $voyage->getDateHeureRetour()?->format(DATE_ATOM),
             'distanceKm' => $voyage->getDistanceKm(),
+            'prisEnCharge' => $voyage->isPrisEnCharge(),
             'villeDepartAller' => $voyage->getVilleDepartAller(),
             'villeArriveeAller' => $voyage->getVilleArriveeAller(),
             'villeDepartRetour' => $voyage->getVilleDepartRetour(),

@@ -43,6 +43,11 @@ class PrimeItem {
     required this.employeeMatricule,
     required this.periodeLabel,
     this.montant,
+    this.tauxMonetaire,
+    this.jours,
+    this.note,
+    this.scoreEquipe,
+    this.scoreCollectif,
   });
 
   final int id;
@@ -51,6 +56,11 @@ class PrimeItem {
   final String employeeMatricule;
   final String periodeLabel;
   final double? montant;
+  final double? tauxMonetaire;
+  final double? jours;
+  final double? note;
+  final double? scoreEquipe;
+  final double? scoreCollectif;
 
   factory PrimeItem.fromJson(Map<String, dynamic> json) {
     final employee = json['employee'];
@@ -71,6 +81,20 @@ class PrimeItem {
     if (mp is num) montant = mp.toDouble();
     if (mf is num) montant = mf.toDouble();
 
+    double? pickNum(String key) {
+      final v = json[key];
+      if (v is num) return v.toDouble();
+      return null;
+    }
+
+    // Prime performance keys: tauxMonetaire, joursPerf, noteHierarchique, scoreEquipe, scoreCollectif
+    // Prime fonction keys: tauxMonetaireFonction, nombreJours, noteHierarchique
+    final taux = pickNum('tauxMonetaire') ?? pickNum('tauxMonetaireFonction');
+    final jours = pickNum('joursPerf') ?? pickNum('nombreJours');
+    final note = pickNum('noteHierarchique');
+    final se = pickNum('scoreEquipe');
+    final sc = pickNum('scoreCollectif');
+
     return PrimeItem(
       id: (json['id'] ?? 0) as int,
       status: (json['status'] ?? '') as String,
@@ -78,6 +102,11 @@ class PrimeItem {
       employeeMatricule: employeeMat.toString(),
       periodeLabel: periodeLabel,
       montant: montant,
+      tauxMonetaire: taux,
+      jours: jours,
+      note: note,
+      scoreEquipe: se,
+      scoreCollectif: sc,
     );
   }
 }

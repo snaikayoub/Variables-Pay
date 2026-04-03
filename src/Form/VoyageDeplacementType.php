@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class VoyageDeplacementType extends AbstractType
 {
@@ -157,6 +158,14 @@ class VoyageDeplacementType extends AbstractType
              * Distance totale (calculée automatiquement)
              * ========================= */
             ->add('distanceKm', HiddenType::class)
+
+            /* =========================
+             * Pris en charge
+             * ========================= */
+            ->add('prisEnCharge', CheckboxType::class, [
+                'label' => 'Pris en charge',
+                'required' => false,
+            ])
             /* =========================
              * Commentaire
              * ========================= */

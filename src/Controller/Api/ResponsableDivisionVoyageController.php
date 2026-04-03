@@ -242,6 +242,11 @@ final class ResponsableDivisionVoyageController extends AbstractController
             'dateHeureDepart' => $voyage->getDateHeureDepart()?->format(DATE_ATOM),
             'dateHeureRetour' => $voyage->getDateHeureRetour()?->format(DATE_ATOM),
             'distanceKm' => $voyage->getDistanceKm(),
+            'prisEnCharge' => $voyage->isPrisEnCharge(),
+            'villeDepartAller' => $voyage->getVilleDepartAller(),
+            'villeArriveeAller' => $voyage->getVilleArriveeAller(),
+            'villeDepartRetour' => $voyage->getVilleDepartRetour(),
+            'villeArriveeRetour' => $voyage->getVilleArriveeRetour(),
             'createdAt' => $voyage->getCreatedAt()?->format(DATE_ATOM),
             'updatedAt' => $voyage->getUpdatedAt()?->format(DATE_ATOM),
         ];

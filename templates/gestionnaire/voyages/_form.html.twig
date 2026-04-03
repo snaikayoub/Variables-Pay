@@ -146,6 +146,14 @@
                 {{ form_widget(form.latArriveeRetour) }}
                 {{ form_widget(form.lonArriveeRetour) }}
 
+                <div class="my-3 d-flex justify-content-center">
+                    <div class="voyage-pris-encharge">
+                        {{ form_widget(form.prisEnCharge, { attr: { class: 'form-check-input voyage-pris-encharge-input' } }) }}
+                        {{ form_label(form.prisEnCharge, null, { label_attr: { class: 'voyage-pris-encharge-label' } }) }}
+                    </div>
+                </div>
+                {{ form_errors(form.prisEnCharge) }}
+
                 <div class="mb-3">
                     {{ form_label(form.commentaire) }}
                     {{ form_widget(form.commentaire, { attr: { class: 'form-control', rows: 2, placeholder: 'Optionnel: details, contraintes, remarques...' } }) }}

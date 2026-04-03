@@ -12,6 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 
 class VoyageDeplacementCrudController extends AbstractCrudController
 {
@@ -41,6 +42,7 @@ class VoyageDeplacementCrudController extends AbstractCrudController
         yield DateTimeField::new('dateHeureDepart', 'Depart');
         yield DateTimeField::new('dateHeureRetour', 'Retour');
         yield NumberField::new('distanceKm', 'Distance (Km)');
+        yield BooleanField::new('prisEnCharge', 'Pris en charge');
 
         yield TextField::new('villeDepartAller', 'Ville depart (aller)')->hideOnIndex();
         yield TextField::new('villeArriveeAller', 'Ville arrivee (aller)')->hideOnIndex();

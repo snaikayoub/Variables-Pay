@@ -46,6 +46,9 @@ class VoyageDeplacement
     #[ORM\Column]
     private ?float $distanceKm = 0.0;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $prisEnCharge = false;
+
     // ───── Villes ─────
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $villeDepartAller = null;
@@ -194,6 +197,18 @@ class VoyageDeplacement
     public function setDistanceKm(?float $distanceKm): static
     {
         $this->distanceKm = $distanceKm ?? 0.0;
+
+        return $this;
+    }
+
+    public function isPrisEnCharge(): bool
+    {
+        return $this->prisEnCharge;
+    }
+
+    public function setPrisEnCharge(bool $prisEnCharge): static
+    {
+        $this->prisEnCharge = $prisEnCharge;
 
         return $this;
     }

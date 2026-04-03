@@ -34,6 +34,29 @@ body {
   border-radius: 12px;
 }
 
+/* Voyage form: "Pris en charge" */
+.voyage-pris-encharge {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border: 1px solid var(--oc-stroke);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.voyage-pris-encharge-input {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0;
+}
+
+.voyage-pris-encharge-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
 .text-muted {
   color: var(--oc-muted) !important;
 }

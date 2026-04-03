@@ -63,8 +63,50 @@ class VariablesPayApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Variables-Pay',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F5A76)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1B63FF), // electric blue
+          surface: const Color(0xFFF6F8FF),
+          brightness: Brightness.light,
+        ).copyWith(
+          secondary: const Color(0xFF00D2FF), // electric cyan
+          tertiary: const Color(0xFF00E676), // neon green
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF6F8FF),
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            // Keep width flexible; full-width is handled by layout (e.g. Expanded).
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 44),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
       ),
       routerConfig: router,
     );

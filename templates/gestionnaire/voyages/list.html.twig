@@ -72,6 +72,7 @@
                                 <div class="text-muted small">
                                     {{ voyage.typeVoyage ? voyage.typeVoyage|capitalize : 'Mission' }}
                                     {% if voyage.modeTransport %}• {{ voyage.modeTransport|capitalize }}{% endif %}
+                                    • {{ voyage.prisEnCharge ? 'Pris en charge' : 'Non pris en charge' }}
                                 </div>
                             </td>
                             <td class="d-none d-lg-table-cell">
