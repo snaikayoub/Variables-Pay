@@ -1,4 +1,4 @@
-package com.example.variables_pay_android
+package org.variablespay.app
 
 import io.flutter.embedding.android.FlutterActivity
 

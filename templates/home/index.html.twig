@@ -3,78 +3,145 @@
 {% block title %}Variables-Pay - Accueil{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold">Bienvenue sur <span class="text-primary">Variables-Pay</span></h1>
-        <p class="lead">Votre plateforme RH intelligente pour visualiser, analyser et piloter vos ressources humaines</p>
-    </div>
+<section class="py-4 py-lg-5" style="background: radial-gradient(1200px 500px at 15% 10%, rgba(27,99,255,0.10), rgba(255,255,255,0)), radial-gradient(900px 420px at 90% 20%, rgba(0,210,255,0.12), rgba(255,255,255,0)), radial-gradient(900px 420px at 70% 90%, rgba(0,230,118,0.10), rgba(255,255,255,0)); border-radius: 20px;">
+    <div class="container">
+        <div class="row align-items-start g-4">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge text-bg-primary">Environnement de test</span>
+                    <span class="badge text-bg-light border">Web + API + Mobile</span>
+                </div>
+                <h1 class="display-6 fw-bold mb-2">Variables Pay</h1>
+                <p class="lead mb-3">Merci de tester l'application. Cette page contient un guide rapide, les comptes de test, et les parcours a verifier.</p>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card border-primary shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📊 Indicateurs RH</h5>
-                    <p class="card-text">Suivez les KPIs : heures supplémentaires, absences, masse salariale, turnover, etc.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-primary">Voir les KPI</a>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if app.user %}
+                        <a class="btn btn-primary" href="{{ path('home') }}">Accueil</a>
+                        <a class="btn btn-outline-primary" href="{{ path('app_logout') }}">Deconnexion</a>
+                    {% else %}
+                        <a class="btn btn-primary" href="{{ path('app_login') }}">Se connecter</a>
+                        <a class="btn btn-outline-secondary" href="#comptes">Voir les comptes</a>
+                    {% endif %}
+                    <a class="btn btn-outline-dark" href="https://variables-pay.org/api" target="_blank" rel="noreferrer">API (docs)</a>
+                </div>
+
+                <div class="alert alert-warning mt-4 mb-0" role="alert">
+                    <strong>Note:</strong> ces identifiants sont uniquement pour la phase de test. A retirer apres validation.
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card border-success shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">👥 Collaborateurs</h5>
-                    <p class="card-text">Visualisez la liste du personnel, les fiches détaillées, parcours et situations professionnelles.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-success">Gestion RH</a>
-                </div>
-            </div>
-        </div>
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h2 class="h5 mb-0">URL</h2>
+                            <span class="badge text-bg-success">HTTPS</span>
+                        </div>
+                        <div class="small text-muted mb-2">Application web</div>
+                        <div class="p-2 rounded border bg-light font-monospace">https://variables-pay.org</div>
 
-        <div class="col-md-4">
-            <div class="card border-info shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📈 Historique et évolutions</h5>
-                    <p class="card-text">Suivez les promotions, mutations, changements familiaux et autres évolutions RH.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-info">Voir l'historique</a>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <div class="small text-muted mt-3 mb-2">API base URL (mobile)</div>
+                        <div class="p-2 rounded border bg-light font-monospace">https://variables-pay.org</div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card border-warning shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📅 Absences et congés</h5>
-                    <p class="card-text">Analyse des absences, types de congés, durée moyenne, alertes de dépassement, etc.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-warning">Statistiques absences</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-secondary shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">💰 Masse salariale</h5>
-                    <p class="card-text">Analyse de la masse salariale, taux horaire, charges sociales, évolutions dans le temps.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-secondary">Voir les données</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-dark shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">🔐 Sécurité & Audits</h5>
-                    <p class="card-text">Suivi des accès, journalisation des actions, rôles et gestion des utilisateurs.</p>
-                    <a href="{{ path('home') }}" class="btn btn-outline-dark">Espace Admin</a>
+                        <div class="small text-muted mt-3 mb-2">Login API</div>
+                        <div class="p-2 rounded border bg-light font-monospace">POST /api/auth/login</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="text-center mt-5">
-        <small class="text-muted">Variables-Pay © {{ "now"|date("Y") }} – Tous droits réservés</small>
+<div class="container my-4">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h2 class="h5">Parcours a tester (web)</h2>
+                    <ol class="mb-0">
+                        <li>Connexion / deconnexion</li>
+                        <li>Saisie gestionnaire: primes et voyages</li>
+                        <li>Validation responsable service, puis responsable division</li>
+                        <li>Affichage des champs (dates, villes, km, transport, pris en charge)</li>
+                        <li>API: /api/me, listes et batch validate/retour/reject</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h2 class="h5">Parcours a tester (mobile)</h2>
+                    <ol class="mb-0">
+                        <li>Connexion</li>
+                        <li>Tableau de bord validations</li>
+                        <li>Listes Voyages / Primes: verifier les champs affiches</li>
+                        <li>Actions batch: valider / retour</li>
+                        <li>Retour au tableau de bord depuis chaque ecran</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mt-4" id="comptes">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
+                <div>
+                    <h2 class="h5 mb-1">Comptes de test</h2>
+                    <div class="text-muted small">Mot de passe pour tous: <span class="font-monospace">ocp</span></div>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_login') }}">Aller a la page de connexion</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Profil</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge text-bg-dark">Admin</span></td>
+                            <td class="font-monospace">admin1@ocp.com</td>
+                            <td class="text-muted">ROLE_ADMIN</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge text-bg-secondary">RH</span></td>
+                            <td class="font-monospace">rh1@ocp.com</td>
+                            <td class="text-muted">ROLE_RH</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge text-bg-primary">Gestionnaire</span></td>
+                            <td class="font-monospace">gest1@ocp.com</td>
+                            <td class="text-muted">ROLE_GESTIONNAIRE_SERVICE</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge text-bg-info">Resp. Service</span></td>
+                            <td class="font-monospace">valserv1@ocp.com</td>
+                            <td class="text-muted">ROLE_RESPONSABLE_SERVICE</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge text-bg-success">Resp. Division</span></td>
+                            <td class="font-monospace">valdiv1@ocp.com</td>
+                            <td class="text-muted">ROLE_RESPONSABLE_DIVISION</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="border rounded p-3 bg-light">
+                <div class="fw-semibold mb-1">Autres comptes disponibles (meme mot de passe: <span class="font-monospace">ocp</span>)</div>
+                <div class="small text-muted">Formats:</div>
+                <div class="font-monospace small">
+                    admin{1..2}@ocp.com, rh{1..5}@ocp.com, gest{1..22}@ocp.com, valserv{1..22}@ocp.com, valdiv{1..10}@ocp.com
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
